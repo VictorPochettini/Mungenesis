@@ -47,7 +47,7 @@ namespace PerlinWorld
         [DllImport("MyCLibrary.dll")]
         public static extern void freeSeed(IntPtr ptr);
 
-        static Cell[] initializeGrid(int squares, int cornerNumber)
+        static Cell[] initializeGrid(int squares, int cornerNumber, out Corner[] corners)
         {
             int length = Math.Sqrt(squares);
             int cornerPerLength = length + 1;
@@ -136,21 +136,17 @@ namespace PerlinWorld
             } while (!flag);
 
             World world = new World();
-            int i = 0;
-            foreach (Vector2 corner in world.grid)
+            Corner[] corners = new Corner[cornerNumber];
+            Cell[] cells = initializeGrid(squares, cornerNumber, out corners);
+
+            foreach (Corner corner in corners)
             {
-                corner.X = seed[i, 0];
-                corner.Y = seed[i, 1];
+                corner.gradientV.X = seed[i, 0];
+                corner.gradientV.Y = seed[i, 1];
                 i++;
             }
 
-            for (int i = 0; i < 1080; i++)
-            {
-                for (int j = 0; j < 1080; j++)
-                {
-                    world.map[i, j] = (int)(DotGrid(world.grid, 1080, squares) * 255);
-                }
-            }
+            
         }
     }
 }
