@@ -28,7 +28,6 @@ namespace PerlinWorld
         {
             int variation = 0;
             bool flag = false;
-            string seed = "";
 
             // Ask user for smoothness level
             do
@@ -52,7 +51,8 @@ namespace PerlinWorld
 
             int squares = (int)Math.Sqrt(variation + 1);
             int corners = (int)Math.Sqrt(squares + 1);
-
+            int[, ] seed = new int[corners, 2];
+            
             // Ask user to insert or generate seed
             do
             {
@@ -68,7 +68,7 @@ namespace PerlinWorld
                 {
                     case 1:
                         Console.WriteLine("Insert seed:");
-                        seed = Console.ReadLine();
+                        //I have to see what I can do here
                         flag = true;
                         break;
 
