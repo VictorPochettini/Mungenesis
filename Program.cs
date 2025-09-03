@@ -139,11 +139,15 @@ namespace PerlinWorld
             Corner[] corners = new Corner[cornerNumber];
             Cell[] cells = initializeGrid(squares, cornerNumber, out corners);
 
-            foreach (Corner corner in corners)
+            foreach (Cell cell in cells)
             {
-                corner.gradientV.X = seed[i, 0];
-                corner.gradientV.Y = seed[i, 1];
-                i++;
+                for (int i = 0; i < 1080 / squares; i++)
+                {
+                    for (int j = 0; j < 1080 / squares; j++)
+                    {
+                        world.map[i, j];
+                    }
+                }
             }
 
             
