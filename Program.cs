@@ -9,6 +9,26 @@ namespace PerlinWorld
         public Vector2[,] grid;
     }
 
+    class Cell
+    {
+        public Corner[] c = new Corner[4];
+        int layer;
+        public Cell(int layer)
+        {
+            this.layer = layer;
+        }
+    }
+
+    class Corner
+    {
+        public int id;
+        public Vector2 gradientV;
+        public Corner(int id)
+        {
+            this.id = id;
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector2
     {
@@ -26,6 +46,33 @@ namespace PerlinWorld
 
         [DllImport("MyCLibrary.dll")]
         public static extern void freeSeed(IntPtr ptr);
+
+        static Cell[] initializeGrid(int squares, int cornerNumber)
+        {
+            int length = Math.Sqrt(squares);
+            int cornerPerLength = length + 1;
+            Corner[] corners = new Corner[cornerNumber];
+            Cell[] cells = new Cell[squares];
+
+            for (int i = 0; i < cornerNumber; i++)
+            {
+                corners[i] = new Corner(i);
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                for (int j = 0; j < cornerPerLength; j++)
+                {
+                    Cell cell = new Cell(i);
+                    cell.c[0] = corners[i * cornerPerLength + j];
+                    cell.c[1] = corners[i * cornerPerLength + j + 1];
+                    cell.c[2] = corners[(i + 1) * cornerPerLength + j];
+                    cell.c[3] = corners[(i + 1) * cornerPerLength + j + 1];
+                    cells[i * cornerPerLength + j] = cell;
+                }
+            }
+            return cells;
+        }
 
         static void Main(string[] args)
         {
@@ -52,9 +99,10 @@ namespace PerlinWorld
 
             flag = false;
 
-            int squares = (int)Math.Sqrt(variation + 1);
-            int corners = (int)Math.Sqrt(squares + 1);
-            Vector2 seed = new Vector2[corners];
+            int squares = (int)Math.Pow(variation + 1, 2);
+            int cornerNumber = (int)Math.Sqrt(squares + 1);
+            Vector2 seed = new Vector2[cornerNumber];
+
 
             // Ask user to insert or generate seed
             do
