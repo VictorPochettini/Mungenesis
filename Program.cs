@@ -22,7 +22,10 @@ namespace PerlinWorld
         public static extern float DotGrid([In] Vector2[] gradients, int gridWidth, int i, int j, float dx, float dy);
 
         [DllImport("MyCLibrary.dll")]
-        public static extern string generateSeed(int corners);
+        public static extern IntPtr generateSeed(int corners);
+
+        [DllImport("MyCLibrary.dll")]
+        public static extern void freeSeed(IntPtr ptr);
 
         static void Main(string[] args)
         {
@@ -35,7 +38,7 @@ namespace PerlinWorld
                 Console.WriteLine("In a scale of 1 to 6, how smooth do you want your world to be?\n");
                 Console.WriteLine("1 is a smooth world with subtle terrain variations. 6 is a varied world, with sudden transitions");
                 Console.Write("Insert answer: ");
-                
+
                 if (!int.TryParse(Console.ReadLine(), out variation) || variation < 1 || variation > 6)
                 {
                     Console.WriteLine("As much as I like new ideas, our developer (myself) hasn't yet figured out how to support this option. Press enter and try again!");
@@ -51,8 +54,8 @@ namespace PerlinWorld
 
             int squares = (int)Math.Sqrt(variation + 1);
             int corners = (int)Math.Sqrt(squares + 1);
-            int[, ] seed = new int[corners, 2];
-            
+            Vector2 seed = new Vector2[corners];
+
             // Ask user to insert or generate seed
             do
             {
@@ -84,8 +87,22 @@ namespace PerlinWorld
 
             } while (!flag);
 
-            // Placeholder: here you would continue with world generation using `variation` and `seed`
-            Console.WriteLine($"World will be generated with variation {variation} and seed {seed}");
+            World world = new World();
+            int i = 0;
+            foreach (Vector2 corner in world.grid)
+            {
+                corner.X = seed[i, 0];
+                corner.Y = seed[i, 1];
+                i++;
+            }
+
+            for (int i = 0; i < 1080; i++)
+            {
+                for (int j = 0; j < 1080; j++)
+                {
+                    world.map[i, j] = (int)(DotGrid(world.grid, 1080, squares) * 255);
+                }
+            }
         }
     }
 }
