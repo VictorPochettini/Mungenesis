@@ -100,8 +100,10 @@ namespace PerlinWorld
 
             flag = false;
 
-            int squares = (int)Math.Pow(variation + 1, 2);
-            int cornerNumber = (int)Math.Sqrt(squares + 1);
+            //Adding +1 do variation so if a user chooses 1, the world will be at least 2x2 squares
+            variation++;
+            int squares = (int)Math.Pow(variation, 2);
+            int cornerNumber = (int)Math.Pow(variation + 1, 2);
             Vector2[] seed = new Vector2[cornerNumber];
 
             World world = new World();
