@@ -1,0 +1,15 @@
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\bin\Debug\net9.0\Mungenesis.exe
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\bin\Debug\net9.0\Mungenesis.deps.json
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\bin\Debug\net9.0\Mungenesis.runtimeconfig.json
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\bin\Debug\net9.0\Mungenesis.dll
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\bin\Debug\net9.0\Mungenesis.pdb
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.AssemblyInfoInputs.cache
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.AssemblyInfo.cs
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.csproj.CoreCompileInputs.cache
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.sourcelink.json
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.dll
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\refint\Mungenesis.dll
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.pdb
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\Mungenesis.genruntimeconfig.cache
+C:\Users\victor.costa\Documents\Códigos\Mungenesis\Mungenesis\obj\Debug\net9.0\ref\Mungenesis.dll

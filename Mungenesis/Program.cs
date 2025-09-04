@@ -1,12 +1,13 @@
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 
 namespace PerlinWorld
 {
     class World
     {
         public int[,] map = new int[1080, 1080];
-        public Vector2[,] grid;
+        public Vector2[,]? grid;
     }
 
     class Cell
@@ -42,16 +43,16 @@ namespace PerlinWorld
         public static extern float DotGrid([In] Vector2[] gradients, int gridWidth, int i, int j, float dx, float dy);
 
         [DllImport("MyCLibrary.dll")]
-        public static extern IntPtr generateSeed(int corners);
+        public static extern void generateSeed([Out] Vector2[] seed, int cornerNumber);
 
         [DllImport("MyCLibrary.dll")]
         public static extern void freeSeed(IntPtr ptr);
 
         static Cell[] initializeGrid(int squares, int cornerNumber, out Corner[] corners)
         {
-            int length = Math.Sqrt(squares);
+            int length = (int)Math.Sqrt(squares);
             int cornerPerLength = length + 1;
-            Corner[] corners = new Corner[cornerNumber];
+            corners = new Corner[cornerNumber];
             Cell[] cells = new Cell[squares];
 
             for (int i = 0; i < cornerNumber; i++)
@@ -101,7 +102,11 @@ namespace PerlinWorld
 
             int squares = (int)Math.Pow(variation + 1, 2);
             int cornerNumber = (int)Math.Sqrt(squares + 1);
-            Vector2 seed = new Vector2[cornerNumber];
+            Vector2[] seed = new Vector2[cornerNumber];
+
+            World world = new World();
+            Corner[] corners = new Corner[cornerNumber];
+            Cell[] cells = initializeGrid(squares, cornerNumber, out corners);
 
 
             // Ask user to insert or generate seed
@@ -124,7 +129,7 @@ namespace PerlinWorld
                         break;
 
                     case 2:
-                        seed = generateSeed(corners);
+                        generateSeed(seed, cornerNumber);
                         flag = true;
                         break;
 
@@ -135,9 +140,10 @@ namespace PerlinWorld
 
             } while (!flag);
 
-            World world = new World();
-            Corner[] corners = new Corner[cornerNumber];
-            Cell[] cells = initializeGrid(squares, cornerNumber, out corners);
+
+            string json = JsonSerializer.Serialize(cells);
+
+            Console.WriteLine(json);
 
             foreach (Cell cell in cells)
             {
@@ -145,12 +151,12 @@ namespace PerlinWorld
                 {
                     for (int j = 0; j < 1080 / squares; j++)
                     {
-                        world.map[i, j];
+
                     }
                 }
             }
 
-            
+
         }
     }
 }
