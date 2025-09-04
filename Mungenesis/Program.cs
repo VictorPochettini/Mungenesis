@@ -62,14 +62,14 @@ namespace PerlinWorld
 
             for (int i = 0; i < length; i++)
             {
-                for (int j = 0; j < cornerPerLength; j++)
+                for (int j = 0; j < length; j++)
                 {
                     Cell cell = new Cell(i);
                     cell.c[0] = corners[i * cornerPerLength + j];
                     cell.c[1] = corners[i * cornerPerLength + j + 1];
                     cell.c[2] = corners[(i + 1) * cornerPerLength + j];
                     cell.c[3] = corners[(i + 1) * cornerPerLength + j + 1];
-                    cells[i * cornerPerLength + j] = cell;
+                    cells[i * length + j] = cell;
                 }
             }
             return cells;
@@ -100,7 +100,7 @@ namespace PerlinWorld
 
             flag = false;
 
-            //Adding +1 do variation so if a user chooses 1, the world will be at least 2x2 squares
+            //Adding +1 do variation so if a user chooses 1, the world will be 2x2 squares
             variation++;
             int squares = (int)Math.Pow(variation, 2);
             int cornerNumber = (int)Math.Pow(variation + 1, 2);

@@ -4,16 +4,33 @@
 #include <time.h>
 #include "cJSON.h"
 
+// Export macro for DLL
+#ifdef _WIN32
+    #define EXPORT __declspec(dllexport)
+#else
+    #define EXPORT
+#endif
+
 // Structure to match C# Vector2
 typedef struct {
     float x;
     float y;
 } Vector2;
 
-// Function signatures
-float DotGrid(Vector2* gradients, int gridWidth, int i, int j, float dx, float dy);
+// Function implementations
+EXPORT float DotGrid(Vector2* gradients, int gridWidth, int i, int j, float dx, float dy)
+{
+    // Placeholder implementation
+    int index = i * gridWidth + j;
+    
+    Vector2 gradient = gradients[index];
+    
+    float dotProduct = gradient.x * dx + gradient.y * dy;
+    
+    return dotProduct;
+}
 
-void generateSeed(Vector2* seed, int cornerNumber)
+EXPORT void generateSeed(Vector2* seed, int cornerNumber)
 {
     srand((unsigned int)time(NULL)); // Seed the random number generator
     for (int i = 0; i < cornerNumber; i++) 
@@ -31,4 +48,10 @@ void generateSeed(Vector2* seed, int cornerNumber)
     }
 }
 
-void freeSeed(void* ptr);
+EXPORT void freeSeed(void* ptr)
+{
+    // Placeholder implementation for freeing memory
+    if (ptr != NULL) {
+        free(ptr);
+    }
+}
