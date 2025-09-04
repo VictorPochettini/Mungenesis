@@ -141,11 +141,16 @@ namespace PerlinWorld
                 }
 
             } while (!flag);
-
+            for (int i = 0; i < cornerNumber; i++)
+            {
+                Console.WriteLine("X" + seed[i].X);
+                Console.WriteLine("Y" +seed[i].Y);
+            }
 
             string json = JsonSerializer.Serialize(cells);
+            string path = "cells.json";
 
-            Console.WriteLine(json);
+            File.WriteAllText(path, json);
 
             foreach (Cell cell in cells)
             {
