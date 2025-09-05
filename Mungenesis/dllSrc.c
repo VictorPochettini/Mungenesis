@@ -50,7 +50,7 @@ EXPORT void generateSeed(Vector2* seed, int cornerNumber)
         float norm = sqrt(seed[i].x * seed[i].x + seed[i].y * seed[i].y);
         seed[i].x /= norm;
         seed[i].y /= norm;
-        
+    
     }
 }
 
