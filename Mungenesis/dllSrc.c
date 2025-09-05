@@ -53,12 +53,28 @@ float lerp(float a, float b, float t)
     return a + t * (b - a);
 }
 
+int interpolation(float corner1Value, float corner2Value, float corner3Value, float corner4Value, int currentPosition, int cellIndex, int cellLine, int cellColumn, int line, int worldSize, int linePerCell)
+{
+    int x1 = currentPosition % worldSize;
+    int x0 = cellColumn * (linePerCell + 1);
+    int y1 = currentPosition / worldSize;
+    int y0 = cellLine * (linePerCell + 1);
+
+    int u = fade(x1 - x0);
+    int v = fade(y1 - y0);
+
+    float ix1 = lerp(corner1Value, corner2Value, u);
+    float ix2 = lerp(corner3Value, corner4Value, u);
+    return (int)lerp(ix1, ix2, v);
+}
+
 // Function implementations
 EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
 {
     int linePerCell = worldSize / variation;
     int line;
     int column;
+    int currentPosition;
     int cellLine;
     int cellColumn;
     int cellIndex;
@@ -86,7 +102,7 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
         corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.x, cells[cellIndex].corner3.y).x +
                        cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.x, cells[cellIndex].corner3.y).y;
         
-        map[line][column].value = interpolation(corner1Value, corner2Value, corner3Value, corner4Value);
+        map[line][column].value = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, i, cellIndex, cellLine, cellColumn, line, worldSize, linePerCell);
     }
 }
 
