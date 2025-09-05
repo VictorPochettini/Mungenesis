@@ -45,6 +45,12 @@ EXPORT void generateSeed(Vector2* seed, int cornerNumber)
         // 50% chance to make the values negative
         seed[i].x = (negative1 == 0) ? seed[i].x : -seed[i].x;
         seed[i].y = (negative2 == 0) ? seed[i].y : -seed[i].y;
+
+        //Normalize the vector
+        float norm = sqrt(seed[i].x * seed[i].x + seed[i].y * seed[i].y);
+        seed[i].x /= norm;
+        seed[i].y /= norm;
+        
     }
 }
 

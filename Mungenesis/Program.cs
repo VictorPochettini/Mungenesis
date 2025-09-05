@@ -140,11 +140,19 @@ namespace PerlinWorld
                         break;
                 }
 
+            foreach(Corner corner in corners)
+                {
+                    corner.gradientV = seed[corner.id];
+                }
+
             } while (!flag);
             for (int i = 0; i < cornerNumber; i++)
             {
-                Console.WriteLine("X" + seed[i].X);
-                Console.WriteLine("Y" +seed[i].Y);
+                Console.WriteLine("X: " + seed[i].X);
+                Console.WriteLine("Y: " + seed[i].Y);
+                Console.WriteLine("Angle: " + Math.Atan2(seed[i].Y, seed[i].X) * (180.0 / Math.PI));
+                Console.WriteLine("Length: " + Math.Sqrt(seed[i].X * seed[i].X + seed[i].Y * seed[i].Y));
+                Console.WriteLine("===============================");
             }
 
             string json = JsonSerializer.Serialize(cells);
