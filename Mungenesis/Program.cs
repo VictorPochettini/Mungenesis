@@ -1,26 +1,28 @@
 ﻿using System;
+using System.Data;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 
 namespace PerlinWorld
 {
-    class World
+    public class World
     {
         public int[,] map = new int[1080, 1080];
         public Vector2[,]? grid;
     }
 
-    class Cell
+    public class Cell
     {
         public Corner[] c = new Corner[4];
-        int layer;
-        public Cell(int layer)
+        public int layer;
+        public int id;
+        public Cell(int layer, int id)
         {
             this.layer = layer;
+            this.id = id;
         }
     }
 
-    class Corner
+    public class Corner
     {
         public int id;
         public Vector2 gradientV;
@@ -30,17 +32,62 @@ namespace PerlinWorld
         }
     }
 
+    public static class ConversionExtensions
+
+    {
+        public static BlittableCell ToBlittable(this Cell cell)
+        {
+            return new BlittableCell
+            {
+                corner0 = cell.c[0].ToBlittable(),
+                corner1 = cell.c[1].ToBlittable(),
+                corner2 = cell.c[2].ToBlittable(),
+                corner3 = cell.c[3].ToBlittable(),
+                layer = cell.layer // You'll need to make this field public in Cell class
+            };
+        }
+
+        public static BlittableCorner ToBlittable(this Corner corner)
+        {
+            return new BlittableCorner
+            {
+                id = corner.id,
+                gradientV = corner.gradientV
+            };
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector2
     {
         public float X;
         public float Y;
+        public float value;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BlittableCell
+    {
+        public BlittableCorner corner0;
+        public BlittableCorner corner1;
+        public BlittableCorner corner2;
+        public BlittableCorner corner3;
+        public int layer;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BlittableCorner
+    {
+        public int id;
+        public Vector2 gradientV;
+    }
+
+
 
     class Program
     {
         [DllImport("MyCLibrary.dll")]
-        public static extern float DotGrid([In] Vector2[] gradients, int gridWidth, int i, int j, float dx, float dy);
+        public static extern unsafe void DotGrid(BlittableCell* cells, int worldSize, int layer);
 
         [DllImport("MyCLibrary.dll")]
         public static extern void generateSeed([Out] Vector2[] seed, int cornerNumber);
@@ -64,7 +111,7 @@ namespace PerlinWorld
             {
                 for (int j = 0; j < length; j++)
                 {
-                    Cell cell = new Cell(i);
+                    Cell cell = new Cell(i, i + j);
                     cell.c[0] = corners[i * cornerPerLength + j];
                     cell.c[1] = corners[i * cornerPerLength + j + 1];
                     cell.c[2] = corners[(i + 1) * cornerPerLength + j];
@@ -140,34 +187,28 @@ namespace PerlinWorld
                         break;
                 }
 
-            foreach(Corner corner in corners)
+                foreach (Corner corner in corners)
                 {
                     corner.gradientV = seed[corner.id];
                 }
 
             } while (!flag);
-            for (int i = 0; i < cornerNumber; i++)
-            {
-                Console.WriteLine("X: " + seed[i].X);
-                Console.WriteLine("Y: " + seed[i].Y);
-                Console.WriteLine("Angle: " + Math.Atan2(seed[i].Y, seed[i].X) * (180.0 / Math.PI));
-                Console.WriteLine("Length: " + Math.Sqrt(seed[i].X * seed[i].X + seed[i].Y * seed[i].Y));
-                Console.WriteLine("===============================");
-            }
 
-            string json = JsonSerializer.Serialize(cells);
-            string path = "cells.json";
-
-            File.WriteAllText(path, json);
+            BlittableCell[] blittableCells = new BlittableCell[cells.Length];
 
             foreach (Cell cell in cells)
             {
-                for (int i = 0; i < 1080 / squares; i++)
-                {
-                    for (int j = 0; j < 1080 / squares; j++)
-                    {
+                BlittableCell blittableCell = cell.ToBlittable();
+                blittableCells[cell.id] = blittableCell;
+            }
 
-                    }
+            unsafe
+            {
+
+                fixed (BlittableCell* ptr = blittableCells)
+                fixed (int* mapPtr = world.map)
+                {
+                    DotGrid(ptr, 1080 * 1080, variation);
                 }
             }
 
