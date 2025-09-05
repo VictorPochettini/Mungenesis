@@ -26,6 +26,7 @@ namespace PerlinWorld
     {
         public int id;
         public Vector2 gradientV;
+        public Vector2 position;
         public Corner(int id)
         {
             this.id = id;
@@ -52,7 +53,8 @@ namespace PerlinWorld
             return new BlittableCorner
             {
                 id = corner.id,
-                gradientV = corner.gradientV
+                gradientV = corner.gradientV,
+                position = corner.position
             };
         }
     }
@@ -80,6 +82,7 @@ namespace PerlinWorld
     {
         public int id;
         public Vector2 gradientV;
+        public Vector2 position;
     }
 
 
@@ -95,7 +98,7 @@ namespace PerlinWorld
         [DllImport("MyCLibrary.dll")]
         public static extern void freeSeed(IntPtr ptr);
 
-        static Cell[] initializeGrid(int squares, int cornerNumber, out Corner[] corners)
+        static Cell[] initializeGrid(int squares, int cornerNumber, int worldSize, out Corner[] corners)
         {
             int length = (int)Math.Sqrt(squares);
             int cornerPerLength = length + 1;
@@ -104,7 +107,13 @@ namespace PerlinWorld
 
             for (int i = 0; i < cornerNumber; i++)
             {
-                corners[i] = new Corner(i);
+                Corner c = new Corner(i);
+                c.position = new Vector2
+                {
+                    X = (i % cornerPerLength) * (worldSize / length),
+                    Y = (i / cornerPerLength) * (worldSize / length)
+                };
+                corners[i] = c;
             }
 
             for (int i = 0; i < length; i++)
@@ -155,7 +164,7 @@ namespace PerlinWorld
 
             World world = new World();
             Corner[] corners = new Corner[cornerNumber];
-            Cell[] cells = initializeGrid(squares, cornerNumber, out corners);
+            Cell[] cells = initializeGrid(squares, cornerNumber, worldSize, out corners);
 
 
             // Ask user to insert or generate seed

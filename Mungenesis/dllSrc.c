@@ -32,6 +32,7 @@ typedef struct
 {
     int id;
     Vector2 gradientV;
+    Vector2 position;
 } BlittableCorner;
 
 Vector2 d(float x, float y, float x0, float y0)
@@ -93,15 +94,15 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
         map[line][column].x = column;
         map[line][column].y = line;
 
-        corner1Value = cells[cellIndex].corner0.gradientV.x * d(column, line, cells[cellIndex].corner0.x, cells[cellIndex].corner0.y).x +
-                       cells[cellIndex].corner0.gradientV.y * d(column, line, cells[cellIndex].corner0.x, cells[cellIndex].corner0.y).y;
-        corner2Value = cells[cellIndex].corner1.gradientV.x * d(column, line, cells[cellIndex].corner1.x, cells[cellIndex].corner1.y).x +
-                       cells[cellIndex].corner1.gradientV.y * d(column, line, cells[cellIndex].corner1.x, cells[cellIndex].corner1.y).y;
-        corner3Value = cells[cellIndex].corner2.gradientV.x * d(column, line, cells[cellIndex].corner2.x, cells[cellIndex].corner2.y).x +
-                       cells[cellIndex].corner2.gradientV.y * d(column, line, cells[cellIndex].corner2.x, cells[cellIndex].corner2.y).y;
-        corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.x, cells[cellIndex].corner3.y).x +
-                       cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.x, cells[cellIndex].corner3.y).y;
-        
+        corner1Value = cells[cellIndex].corner0.gradientV.x * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).x +
+                       cells[cellIndex].corner0.gradientV.y * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).y;
+        corner2Value = cells[cellIndex].corner1.gradientV.x * d(column, line, cells[cellIndex].corner1.position.x, cells[cellIndex].corner1.position.y).x +
+                       cells[cellIndex].corner1.gradientV.y * d(column, line, cells[cellIndex].corner1.position.x, cells[cellIndex].corner1.position.y).y;
+        corner3Value = cells[cellIndex].corner2.gradientV.x * d(column, line, cells[cellIndex].corner2.position.x, cells[cellIndex].corner2.position.y).x +
+                       cells[cellIndex].corner2.gradientV.y * d(column, line, cells[cellIndex].corner2.position.x, cells[cellIndex].corner2.position.y).y;
+        corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).x +
+                       cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).y;
+
         map[line][column].value = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, i, cellIndex, cellLine, cellColumn, line, worldSize, linePerCell);
     }
 }
