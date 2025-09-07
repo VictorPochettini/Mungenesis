@@ -1,0 +1,23 @@
+DotGrid called with worldSize=1080, variation=7
+linePerCell=154
+i=0, line=0, column=0, cellIndex=0
+Map[0] = 0, corner values: 0.00 -27.34 49.11 -197.74
+i=1, line=0, column=1, cellIndex=0
+Map[1] = 0, corner values: 0.68 -27.16 50.06 -197.40
+i=2, line=0, column=2, cellIndex=0
+Map[2] = 1, corner values: 1.35 -26.99 51.01 -197.05
+i=3, line=0, column=3, cellIndex=0
+Map[3] = 2, corner values: 2.03 -26.81 51.95 -196.71
+i=4, line=0, column=4, cellIndex=0
+Map[4] = 2, corner values: 2.70 -26.63 52.90 -196.36
+i=5, line=0, column=5, cellIndex=0
+Map[5] = 3, corner values: 3.38 -26.45 53.85 -196.01
+i=6, line=0, column=6, cellIndex=0
+Map[6] = 4, corner values: 4.05 -26.28 54.80 -195.67
+i=7, line=0, column=7, cellIndex=0
+Map[7] = 4, corner values: 4.73 -26.10 55.75 -195.32
+i=8, line=0, column=8, cellIndex=0
+Map[8] = 5, corner values: 5.40 -25.92 56.69 -194.98
+i=9, line=0, column=9, cellIndex=0
+Map[9] = 6, corner values: 6.08 -25.74 57.64 -194.63
+DotGrid completed successfully

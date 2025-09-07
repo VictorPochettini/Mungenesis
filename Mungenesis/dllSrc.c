@@ -21,19 +21,19 @@ typedef struct
 
 typedef struct
 {
+    int id;
+    Vector2 gradientV;
+    Vector2 position;
+} BlittableCorner;
+
+typedef struct
+{
     BlittableCorner corner0;
     BlittableCorner corner1;
     BlittableCorner corner2;
     BlittableCorner corner3;
     int layer;
 } BlittableCell;
-
-typedef struct
-{
-    int id;
-    Vector2 gradientV;
-    Vector2 position;
-} BlittableCorner;
 
 Vector2 d(float x, float y, float x0, float y0)
 {
@@ -44,7 +44,7 @@ Vector2 d(float x, float y, float x0, float y0)
     return result;
 }
 
-int fade(int t)
+float fade(float t)
 {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
@@ -54,25 +54,39 @@ float lerp(float a, float b, float t)
     return a + t * (b - a);
 }
 
-int interpolation(float corner1Value, float corner2Value, float corner3Value, float corner4Value, int currentPosition, int cellIndex, int cellLine, int cellColumn, int line, int worldSize, int linePerCell)
+int interpolation(float corner1Value, float corner2Value, float corner3Value, float corner4Value,
+                  int line, int column, int linePerCell)
 {
-    int x1 = currentPosition % worldSize;
-    int x0 = cellColumn * (linePerCell + 1);
-    int y1 = currentPosition / worldSize;
-    int y0 = cellLine * (linePerCell + 1);
+    // Calculate position within the current cell (0.0 to 1.0)
+    float localX = (float)(column % linePerCell) / linePerCell;
+    float localY = (float)(line % linePerCell) / linePerCell;
 
-    int u = fade(x1 - x0);
-    int v = fade(y1 - y0);
+    // Apply fade function for smooth interpolation
+    float u = fade(localX);
+    float v = fade(localY);
 
-    float ix1 = lerp(corner1Value, corner2Value, u);
-    float ix2 = lerp(corner3Value, corner4Value, u);
-    return (int)lerp(ix1, ix2, v);
+    // Bilinear interpolation
+    float ix1 = lerp(corner1Value, corner2Value, u); // Top edge
+    float ix2 = lerp(corner3Value, corner4Value, u); // Bottom edge
+
+    return (int)lerp(ix1, ix2, v); // Final interpolation between top and bottom
 }
 
 // Function implementations
-EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
+EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation)
 {
+    FILE *debug_file = fopen("debug.txt", "w");
+    if (!debug_file) {
+        return; // Can't open file, exit
+    }
+    
+    fprintf(debug_file, "DotGrid called with worldSize=%d, variation=%d\n", worldSize, variation);
+    fflush(debug_file);
+    
     int linePerCell = worldSize / variation;
+    fprintf(debug_file, "linePerCell=%d\n", linePerCell);
+    fflush(debug_file);
+    
     int line;
     int column;
     int currentPosition;
@@ -80,7 +94,6 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
     int cellColumn;
     int cellIndex;
     float corner1Value, corner2Value, corner3Value, corner4Value;
-    Vector2 map[worldSize][worldSize];
     BlittableCell *cell;
 
     for (int i = 0; i < worldSize * worldSize; i++)
@@ -91,8 +104,11 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
         cellColumn = column / linePerCell;
         cellIndex = cellLine * variation + cellColumn;
 
-        map[line][column].x = column;
-        map[line][column].y = line;
+        // Only debug first 10 iterations to avoid huge file
+        if (i < 10) {
+            fprintf(debug_file, "i=%d, line=%d, column=%d, cellIndex=%d\n", i, line, column, cellIndex);
+            fflush(debug_file);
+        }
 
         corner1Value = cells[cellIndex].corner0.gradientV.x * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).x +
                        cells[cellIndex].corner0.gradientV.y * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).y;
@@ -103,8 +119,18 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int variation)
         corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).x +
                        cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).y;
 
-        map[line][column].value = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, i, cellIndex, cellLine, cellColumn, line, worldSize, linePerCell);
+        map[i] = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell);
+        
+        // Only debug first 10 iterations
+        if (i < 10) {
+            fprintf(debug_file, "Map[%d] = %d, corner values: %.2f %.2f %.2f %.2f\n", 
+                    i, map[i], corner1Value, corner2Value, corner3Value, corner4Value);
+            fflush(debug_file);
+        }
     }
+    
+    fprintf(debug_file, "DotGrid completed successfully\n");
+    fclose(debug_file);
 }
 
 EXPORT void generateSeed(Vector2 *seed, int cornerNumber)

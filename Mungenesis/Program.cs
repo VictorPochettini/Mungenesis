@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Data;
 using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.IO;
 
 namespace PerlinWorld
 {
     public class World
     {
-        public int[,] map = new int[1080, 1080];
         public Vector2[,]? grid;
     }
 
@@ -90,7 +91,7 @@ namespace PerlinWorld
     class Program
     {
         [DllImport("MyCLibrary.dll")]
-        public static extern unsafe void DotGrid(BlittableCell* cells, int worldSize, int layer);
+        public static extern unsafe void DotGrid(BlittableCell* cells, int worldSize, int* map, int layer);
 
         [DllImport("MyCLibrary.dll")]
         public static extern void generateSeed([Out] Vector2[] seed, int cornerNumber);
@@ -135,6 +136,12 @@ namespace PerlinWorld
         {
             int variation = 0;
             bool flag = false;
+            int worldSize = 1080; // Temporarily reduce size for testing
+            int[] mapFromC = new int[worldSize * worldSize];
+            int[,] map = new int[worldSize, worldSize];
+            var sb = new System.Text.StringBuilder();
+
+            Console.WriteLine("Testing with smaller world size first...");
 
             // Ask user for smoothness level
             do
@@ -161,6 +168,7 @@ namespace PerlinWorld
             int squares = (int)Math.Pow(variation, 2);
             int cornerNumber = (int)Math.Pow(variation + 1, 2);
             Vector2[] seed = new Vector2[cornerNumber];
+            string mapString;
 
             World world = new World();
             Corner[] corners = new Corner[cornerNumber];
@@ -211,17 +219,65 @@ namespace PerlinWorld
                 blittableCells[cell.id] = blittableCell;
             }
 
+            // Debug: Check if data is set up correctly
+            Console.WriteLine($"Number of cells: {blittableCells.Length}");
+            Console.WriteLine($"Variation: {variation}");
+            Console.WriteLine($"World size: {worldSize}");
+            Console.WriteLine($"First corner gradient: {blittableCells[0].corner0.gradientV.X}, {blittableCells[0].corner0.gradientV.Y}");
+            Console.WriteLine($"First corner position: {blittableCells[0].corner0.position.X}, {blittableCells[0].corner0.position.Y}");
+
             unsafe
             {
 
                 fixed (BlittableCell* ptr = blittableCells)
-                fixed (int* mapPtr = world.map)
+                fixed (int* mapPtr = mapFromC)
                 {
-                    DotGrid(ptr, 1080 * 1080, variation);
+                    Console.WriteLine("Calling DotGrid...");
+                    DotGrid(ptr, worldSize, mapPtr, variation);
+                    Console.WriteLine("DotGrid completed.");
                 }
             }
 
+            // Debug: Check if map has values
+            Console.WriteLine($"First map values: {mapFromC[0]}, {mapFromC[1]}, {mapFromC[2]}");
+            Console.WriteLine($"Some middle values: {mapFromC[1000]}, {mapFromC[2000]}, {mapFromC[3000]}");
 
+            var objec = new { Seed = seed, Map = mapFromC, Variation = variation - 1, WorldSize = worldSize };
+            Console.WriteLine("Creating JSON...");
+
+            try
+            {
+                string json = JsonSerializer.Serialize(objec);
+
+                Console.WriteLine($"JSON created. Length: {json.Length}");
+                //Console.WriteLine($"First 100 chars: {json.Substring(0, Math.Min(100, json.Length))}");
+
+                Console.WriteLine("Writing to file...");
+                File.WriteAllText("Front-end/world.json", json);
+                Console.WriteLine("File written successfully!");
+
+                // Verify file was written
+                if (File.Exists("Front-end/world.json"))
+                {
+                    long fileSize = new FileInfo("Front-end/world.json").Length;
+                    Console.WriteLine($"File exists and is {fileSize} bytes");
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: File was not created!");
+                }
+
+                string jsContent = $"const worldData = {json};";
+                File.WriteAllText("Front-end/world.js", jsContent);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+            
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }

@@ -1,0 +1,33 @@
+html
+{
+    background-color: #000000;
+    color: #ffffff;
+}
+
+body
+{
+    margin: 0;
+    padding: 20px;
+    overflow: auto; /* Allow scrolling */
+    min-height: 100vh;
+}
+
+canvas
+{
+    display: block;
+    margin: 0 auto;
+    background-color: #111111;
+    border: 1px solid #333333; /* Add border to see canvas boundaries */
+}
+
+header
+{
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1
+{
+    margin: 0;
+    padding: 10px;
+}

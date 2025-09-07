@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Mungenesis")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+354b7f16877599d4fa24cfb6e68f5bc47fe8bef4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8c0085facca5c5d2b01585f042e41c1400394af4")]
 [assembly: System.Reflection.AssemblyProductAttribute("Mungenesis")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Mungenesis")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
