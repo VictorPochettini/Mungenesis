@@ -121,7 +121,8 @@ namespace PerlinWorld
             {
                 for (int j = 0; j < length; j++)
                 {
-                    Cell cell = new Cell(i, i + j);
+                    int cellIndex = i * length + j;
+                    Cell cell = new Cell(i, cellIndex);
                     cell.c[0] = corners[i * cornerPerLength + j];
                     cell.c[1] = corners[i * cornerPerLength + j + 1];
                     cell.c[2] = corners[(i + 1) * cornerPerLength + j];
@@ -150,7 +151,7 @@ namespace PerlinWorld
                 Console.WriteLine("1 is a smooth world with subtle terrain variations. 6 is a varied world, with sudden transitions");
                 Console.Write("Insert answer: ");
 
-                if (!int.TryParse(Console.ReadLine(), out variation) || variation < 1 || variation > 6)
+                if (!int.TryParse(Console.ReadLine(), out variation) || variation < 1 || variation > 500)
                 {
                     Console.WriteLine("As much as I like new ideas, our developer (myself) hasn't yet figured out how to support this option. Press enter and try again!");
                     Console.ReadLine();
@@ -213,18 +214,11 @@ namespace PerlinWorld
 
             BlittableCell[] blittableCells = new BlittableCell[cells.Length];
 
-            foreach (Cell cell in cells)
+            for (int i = 0; i < cells.Length; i++)
             {
-                BlittableCell blittableCell = cell.ToBlittable();
-                blittableCells[cell.id] = blittableCell;
+                BlittableCell blittableCell = cells[i].ToBlittable();
+                blittableCells[i] = blittableCell;
             }
-
-            // Debug: Check if data is set up correctly
-            Console.WriteLine($"Number of cells: {blittableCells.Length}");
-            Console.WriteLine($"Variation: {variation}");
-            Console.WriteLine($"World size: {worldSize}");
-            Console.WriteLine($"First corner gradient: {blittableCells[0].corner0.gradientV.X}, {blittableCells[0].corner0.gradientV.Y}");
-            Console.WriteLine($"First corner position: {blittableCells[0].corner0.position.X}, {blittableCells[0].corner0.position.Y}");
 
             unsafe
             {

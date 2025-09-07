@@ -69,7 +69,7 @@ int interpolation(float corner1Value, float corner2Value, float corner3Value, fl
     float ix1 = lerp(corner1Value, corner2Value, u); // Top edge
     float ix2 = lerp(corner3Value, corner4Value, u); // Bottom edge
 
-    return (int)lerp(ix1, ix2, v); // Final interpolation between top and bottom
+    return (int) lerp(ix1, ix2, v); // Final interpolation between top and bottom
 }
 
 // Function implementations
@@ -104,12 +104,6 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation
         cellColumn = column / linePerCell;
         cellIndex = cellLine * variation + cellColumn;
 
-        // Only debug first 10 iterations to avoid huge file
-        if (i < 10) {
-            fprintf(debug_file, "i=%d, line=%d, column=%d, cellIndex=%d\n", i, line, column, cellIndex);
-            fflush(debug_file);
-        }
-
         corner1Value = cells[cellIndex].corner0.gradientV.x * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).x +
                        cells[cellIndex].corner0.gradientV.y * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).y;
         corner2Value = cells[cellIndex].corner1.gradientV.x * d(column, line, cells[cellIndex].corner1.position.x, cells[cellIndex].corner1.position.y).x +
@@ -118,7 +112,7 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation
                        cells[cellIndex].corner2.gradientV.y * d(column, line, cells[cellIndex].corner2.position.x, cells[cellIndex].corner2.position.y).y;
         corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).x +
                        cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).y;
-
+        
         map[i] = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell);
         
         // Only debug first 10 iterations
@@ -127,6 +121,8 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation
                     i, map[i], corner1Value, corner2Value, corner3Value, corner4Value);
             fflush(debug_file);
         }
+
+
     }
     
     fprintf(debug_file, "DotGrid completed successfully\n");

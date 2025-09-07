@@ -72,11 +72,12 @@ class CanvasManager {
 const canvas = document.getElementById('canvas');
 const canvasManager = new CanvasManager(canvas);
 
-fetch('world.json')
-    .then(response => response.json())
-    .then(data => {
-        canvasManager.drawWorld(data);
-    })
-    .catch(error => {
-        console.error('Error loading world data:', error);
-    });
+// Remove the fetch code and replace with:
+// Wait for the DOM to be fully loaded, then check if worldData exists
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof worldData !== 'undefined') {
+        canvasManager.drawWorld(worldData);
+    } else {
+        console.error('World data not loaded. Make sure world.js is properly generated.');
+    }
+});
