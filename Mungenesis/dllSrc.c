@@ -72,8 +72,26 @@ int interpolation(float corner1Value, float corner2Value, float corner3Value, fl
     return (int) lerp(ix1, ix2, v); // Final interpolation between top and bottom
 }
 
+float interpolationFloat(float corner1Value, float corner2Value, float corner3Value, float corner4Value,
+                        int line, int column, int linePerCell)
+{
+
+    float localX = (float)(column % linePerCell) / linePerCell;
+    float localY = (float)(line % linePerCell) / linePerCell;
+
+    
+    float u = fade(localX);
+    float v = fade(localY);
+
+    // Bilinear interpolation
+    float ix1 = lerp(corner1Value, corner2Value, u); // Top edge
+    float ix2 = lerp(corner3Value, corner4Value, u); // Bottom edge
+
+    return lerp(ix1, ix2, v); // Return float for octave processing
+}
+
 // Function implementations
-EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation)
+EXPORT void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation, int octaves, float persistence, float lacunarity)
 {
     FILE *debug_file = fopen("debug.txt", "w");
     if (!debug_file) {
@@ -93,6 +111,7 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation
     int cellLine;
     int cellColumn;
     int cellIndex;
+    int value;
     float corner1Value, corner2Value, corner3Value, corner4Value;
     BlittableCell *cell;
 
@@ -113,8 +132,10 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int* map, int variation
         corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).x +
                        cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).y;
         
-        map[i] = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell);
-        
+        value = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell); 
+
+        map[i] = value < 0 ? value + 12 : (variation * 4) * value;
+
         // Only debug first 10 iterations
         if (i < 10) {
             fprintf(debug_file, "Map[%d] = %d, corner values: %.2f %.2f %.2f %.2f\n", 

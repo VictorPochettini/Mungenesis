@@ -1,13 +1,13 @@
-DotGrid called with worldSize=1080, variation=2
-linePerCell=540
-Map[0] = 0, corner values: 0.00 -397.76 416.72 -760.65
-Map[1] = 0, corner values: 0.54 -397.02 416.09 -760.01
-Map[2] = 1, corner values: 1.08 -396.29 415.45 -759.37
-Map[3] = 1, corner values: 1.62 -395.55 414.82 -758.73
-Map[4] = 2, corner values: 2.15 -394.81 414.18 -758.08
-Map[5] = 2, corner values: 2.69 -394.08 413.54 -757.44
-Map[6] = 3, corner values: 3.23 -393.34 412.91 -756.80
-Map[7] = 3, corner values: 3.77 -392.60 412.27 -756.16
-Map[8] = 4, corner values: 4.31 -391.87 411.64 -755.52
-Map[9] = 4, corner values: 4.85 -391.13 411.00 -754.88
+DotGrid called with worldSize=1080, variation=16
+linePerCell=67
+Map[0] = 0, corner values: 0.00 12.01 30.81 92.19
+Map[1] = 0, corner values: -0.34 11.83 31.70 91.34
+Map[2] = 0, corner values: -0.68 11.65 32.58 90.49
+Map[3] = 11, corner values: -1.02 11.47 33.47 89.64
+Map[4] = 11, corner values: -1.36 11.29 34.36 88.79
+Map[5] = 11, corner values: -1.69 11.11 35.25 87.94
+Map[6] = 11, corner values: -2.03 10.93 36.14 87.08
+Map[7] = 10, corner values: -2.37 10.75 37.02 86.23
+Map[8] = 10, corner values: -2.71 10.57 37.91 85.38
+Map[9] = 10, corner values: -3.05 10.40 38.80 84.53
 DotGrid completed successfully
