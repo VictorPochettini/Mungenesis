@@ -79,18 +79,11 @@ void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation)
 // Function implementations
 EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int variation, int octave)
 {
-    FILE *debug_file = fopen("debug.txt", "w");
-    if (!debug_file)
-    {
-        return; // Can't open file, exit
-    }
 
-    fprintf(debug_file, "DotGrid called with worldSize=%d, variation=%d\n", worldSize, variation);
-    fflush(debug_file);
+
 
     int linePerCell = worldSize / variation;
-    fprintf(debug_file, "linePerCell=%d\n", linePerCell);
-    fflush(debug_file);
+
 
     int line;
     int column;
@@ -143,9 +136,6 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
 
         map[i] = value; // < 0 ? value + 12 : (variation * 4) * value;
     }
-
-    fprintf(debug_file, "DotGrid completed successfully\n");
-    fclose(debug_file);
 }
 
 EXPORT void generateSeed(Vector2 *seed, int cornerNumber)

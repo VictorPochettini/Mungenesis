@@ -228,7 +228,7 @@ namespace PerlinWorld
                 fixed (int* mapPtr = mapFromC)
                 {
                     Console.WriteLine("Calling DotGrid...");
-                    PerlinNoise(ptr, worldSize, mapPtr, variation, octave=4);
+                    PerlinNoise(ptr, worldSize, mapPtr, variation, octave);
                     Console.WriteLine("DotGrid completed.");
                 }
             }
