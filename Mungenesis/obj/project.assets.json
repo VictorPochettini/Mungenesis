@@ -8,23 +8,23 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\victor.costa\\.nuget\\packages\\": {},
+    "C:\\Users\\vpoch\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\victor.costa\\Documents\\Códigos\\Mungenesis\\Mungenesis\\Mungenesis.csproj",
+      "projectUniqueName": "C:\\Users\\vpoch\\OneDrive\\Documentos\\Programas\\Perlin\\Mungenesis\\Mungenesis\\Mungenesis.csproj",
       "projectName": "Mungenesis",
-      "projectPath": "C:\\Users\\victor.costa\\Documents\\Códigos\\Mungenesis\\Mungenesis\\Mungenesis.csproj",
-      "packagesPath": "C:\\Users\\victor.costa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\victor.costa\\Documents\\Códigos\\Mungenesis\\Mungenesis\\obj\\",
+      "projectPath": "C:\\Users\\vpoch\\OneDrive\\Documentos\\Programas\\Perlin\\Mungenesis\\Mungenesis\\Mungenesis.csproj",
+      "packagesPath": "C:\\Users\\vpoch\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\vpoch\\OneDrive\\Documentos\\Programas\\Perlin\\Mungenesis\\Mungenesis\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\victor.costa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\vpoch\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -33,6 +33,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -49,9 +50,9 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "direct"
+        "auditMode": "all"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -72,7 +73,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

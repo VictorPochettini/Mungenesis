@@ -69,49 +69,45 @@ int interpolation(float corner1Value, float corner2Value, float corner3Value, fl
     float ix1 = lerp(corner1Value, corner2Value, u); // Top edge
     float ix2 = lerp(corner3Value, corner4Value, u); // Bottom edge
 
-    return (int) lerp(ix1, ix2, v); // Final interpolation between top and bottom
+    return (int)lerp(ix1, ix2, v); // Final interpolation between top and bottom
 }
 
-float interpolationFloat(float corner1Value, float corner2Value, float corner3Value, float corner4Value,
-                        int line, int column, int linePerCell)
+void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation)
 {
-
-    float localX = (float)(column % linePerCell) / linePerCell;
-    float localY = (float)(line % linePerCell) / linePerCell;
-
-    
-    float u = fade(localX);
-    float v = fade(localY);
-
-    // Bilinear interpolation
-    float ix1 = lerp(corner1Value, corner2Value, u); // Top edge
-    float ix2 = lerp(corner3Value, corner4Value, u); // Bottom edge
-
-    return lerp(ix1, ix2, v); // Return float for octave processing
 }
 
 // Function implementations
-EXPORT void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation, int octaves, float persistence, float lacunarity)
+EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int variation, int octave)
 {
     FILE *debug_file = fopen("debug.txt", "w");
-    if (!debug_file) {
+    if (!debug_file)
+    {
         return; // Can't open file, exit
     }
-    
+
     fprintf(debug_file, "DotGrid called with worldSize=%d, variation=%d\n", worldSize, variation);
     fflush(debug_file);
-    
+
     int linePerCell = worldSize / variation;
     fprintf(debug_file, "linePerCell=%d\n", linePerCell);
     fflush(debug_file);
-    
+
     int line;
     int column;
-    int currentPosition;
+    int currentLine;
+    int currentColumn;
     int cellLine;
     int cellColumn;
     int cellIndex;
-    int value;
+    int currCellLine;
+    int currCellColumn;
+    int currCellIndex;
+    int value = 0;
+    int frequency = 2;
+    int total;
+    int maxValue;
+    float amplitude;
+    float persistence = 0.5;
     float corner1Value, corner2Value, corner3Value, corner4Value;
     BlittableCell *cell;
 
@@ -123,29 +119,31 @@ EXPORT void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation
         cellColumn = column / linePerCell;
         cellIndex = cellLine * variation + cellColumn;
 
-        corner1Value = cells[cellIndex].corner0.gradientV.x * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).x +
-                       cells[cellIndex].corner0.gradientV.y * d(column, line, cells[cellIndex].corner0.position.x, cells[cellIndex].corner0.position.y).y;
-        corner2Value = cells[cellIndex].corner1.gradientV.x * d(column, line, cells[cellIndex].corner1.position.x, cells[cellIndex].corner1.position.y).x +
-                       cells[cellIndex].corner1.gradientV.y * d(column, line, cells[cellIndex].corner1.position.x, cells[cellIndex].corner1.position.y).y;
-        corner3Value = cells[cellIndex].corner2.gradientV.x * d(column, line, cells[cellIndex].corner2.position.x, cells[cellIndex].corner2.position.y).x +
-                       cells[cellIndex].corner2.gradientV.y * d(column, line, cells[cellIndex].corner2.position.x, cells[cellIndex].corner2.position.y).y;
-        corner4Value = cells[cellIndex].corner3.gradientV.x * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).x +
-                       cells[cellIndex].corner3.gradientV.y * d(column, line, cells[cellIndex].corner3.position.x, cells[cellIndex].corner3.position.y).y;
-        
-        value = interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell); 
+        for (int j = 0; j < octave; j++)
+        {
+            frequency = pow(frequency, j);
+            amplitude = pow(persistence, j);
+            currentLine = (j * frequency) / worldSize;
+            currentColumn = (j * frequency) % worldSize;
+            currCellLine = currentLine / linePerCell;
+            currCellColumn = currentColumn / linePerCell;
+            currCellIndex = currCellIndex * variation + currCellColumn;
 
-        map[i] = value < 0 ? value + 12 : (variation * 4) * value;
+            corner1Value = cells[currCellIndex].corner0.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y).x +
+                           cells[currCellIndex].corner0.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y).y;
+            corner2Value = cells[currCellIndex].corner1.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner1.position.x, cells[currCellIndex].corner1.position.y).x +
+                           cells[currCellIndex].corner1.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner1.position.x, cells[currCellIndex].corner1.position.y).y;
+            corner3Value = cells[currCellIndex].corner2.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner2.position.x, cells[currCellIndex].corner2.position.y).x +
+                           cells[currCellIndex].corner2.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner2.position.x, cells[currCellIndex].corner2.position.y).y;
+            corner4Value = cells[currCellIndex].corner3.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner3.position.x, cells[currCellIndex].corner3.position.y).x +
+                           cells[currCellIndex].corner3.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner3.position.x, cells[currCellIndex].corner3.position.y).y;
 
-        // Only debug first 10 iterations
-        if (i < 10) {
-            fprintf(debug_file, "Map[%d] = %d, corner values: %.2f %.2f %.2f %.2f\n", 
-                    i, map[i], corner1Value, corner2Value, corner3Value, corner4Value);
-            fflush(debug_file);
+            value += interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell) * amplitude;
         }
 
-
+        map[i] = value; // < 0 ? value + 12 : (variation * 4) * value;
     }
-    
+
     fprintf(debug_file, "DotGrid completed successfully\n");
     fclose(debug_file);
 }
