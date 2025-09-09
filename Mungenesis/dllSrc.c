@@ -80,8 +80,6 @@ void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation)
 EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int variation, int octave)
 {
 
-
-
     int linePerCell = worldSize / variation;
 
 
@@ -96,7 +94,7 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
     int currCellColumn;
     int currCellIndex;
     int value = 0;
-    int frequency = 2;
+    int frequency;
     int total;
     int maxValue;
     float amplitude;
@@ -106,6 +104,7 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
 
     for (int i = 0; i < worldSize * worldSize; i++)
     {
+        frequency = 2;
         line = i / worldSize;
         column = i % worldSize;
         cellLine = line / linePerCell;
@@ -120,7 +119,7 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
             currentColumn = (j * frequency) % worldSize;
             currCellLine = currentLine / linePerCell;
             currCellColumn = currentColumn / linePerCell;
-            currCellIndex = currCellIndex * variation + currCellColumn;
+            currCellIndex = currCellLine * variation + currCellColumn;
 
             corner1Value = cells[currCellIndex].corner0.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y).x +
                            cells[currCellIndex].corner0.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y).y;
