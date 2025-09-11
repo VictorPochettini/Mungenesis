@@ -54,12 +54,23 @@ float lerp(float a, float b, float t)
     return a + t * (b - a);
 }
 
-int interpolation(float corner1Value, float corner2Value, float corner3Value, float corner4Value,
-                  int line, int column, int linePerCell)
+float interpolation(
+    float corner1Value, float corner2Value, float corner3Value, float corner4Value,
+    int line, int column, int cellLine, int cellColumn,
+    int worldSize, int variation
+)
 {
     // Calculate position within the current cell (0.0 to 1.0)
-    float localX = (float)(column % linePerCell) / linePerCell;
-    float localY = (float)(line % linePerCell) / linePerCell;
+    float cellWidth = (float)worldSize / variation;
+    float cellHeight = (float)worldSize / variation;
+
+    float localX = ((float)column - (cellColumn * cellWidth)) / cellWidth;
+    float localY = ((float)line - (cellLine * cellHeight)) / cellHeight;
+
+    if (localX < 0.0f) localX = 0.0f;
+    if (localX > 1.0f) localX = 1.0f;
+    if (localY < 0.0f) localY = 0.0f;
+    if (localY > 1.0f) localY = 1.0f;
 
     // Apply fade function for smooth interpolation
     float u = fade(localX);
@@ -69,11 +80,7 @@ int interpolation(float corner1Value, float corner2Value, float corner3Value, fl
     float ix1 = lerp(corner1Value, corner2Value, u); // Top edge
     float ix2 = lerp(corner3Value, corner4Value, u); // Bottom edge
 
-    return (int)lerp(ix1, ix2, v); // Final interpolation between top and bottom
-}
-
-void DotGrid(BlittableCell *cells, int worldSize, int *map, int variation)
-{
+    return lerp(ix1, ix2, v); // Final interpolation between top and bottom
 }
 
 // Function implementations
@@ -81,7 +88,6 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
 {
 
     int linePerCell = worldSize / variation;
-
 
     int line;
     int column;
@@ -93,18 +99,20 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
     int currCellLine;
     int currCellColumn;
     int currCellIndex;
-    int value = 0;
     int frequency;
     int total;
-    int maxValue;
+    float maxValue;
     float amplitude;
+    float value;
     float persistence = 0.5;
     float corner1Value, corner2Value, corner3Value, corner4Value;
     BlittableCell *cell;
 
     for (int i = 0; i < worldSize * worldSize; i++)
     {
-        frequency = 2;
+        value = 0.0;
+        maxValue = 0.0;
+        frequency = 2.0;
         line = i / worldSize;
         column = i % worldSize;
         cellLine = line / linePerCell;
@@ -113,27 +121,40 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
 
         for (int j = 0; j < octave; j++)
         {
-            frequency = pow(frequency, j);
-            amplitude = pow(persistence, j);
-            currentLine = (j * frequency) / worldSize;
-            currentColumn = (j * frequency) % worldSize;
+            frequency = 1 << j;
+            amplitude = powf(persistence, (float)j);
+
+            currentLine = (line * frequency) % worldSize;
+            currentColumn = (column * frequency) % worldSize;
             currCellLine = currentLine / linePerCell;
             currCellColumn = currentColumn / linePerCell;
-            currCellIndex = currCellLine * variation + currCellColumn;
 
-            corner1Value = cells[currCellIndex].corner0.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y).x +
-                           cells[currCellIndex].corner0.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y).y;
-            corner2Value = cells[currCellIndex].corner1.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner1.position.x, cells[currCellIndex].corner1.position.y).x +
-                           cells[currCellIndex].corner1.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner1.position.x, cells[currCellIndex].corner1.position.y).y;
-            corner3Value = cells[currCellIndex].corner2.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner2.position.x, cells[currCellIndex].corner2.position.y).x +
-                           cells[currCellIndex].corner2.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner2.position.x, cells[currCellIndex].corner2.position.y).y;
-            corner4Value = cells[currCellIndex].corner3.gradientV.x * d(currentColumn, currentLine, cells[currCellIndex].corner3.position.x, cells[currCellIndex].corner3.position.y).x +
-                           cells[currCellIndex].corner3.gradientV.y * d(currentColumn, currentLine, cells[currCellIndex].corner3.position.x, cells[currCellIndex].corner3.position.y).y;
+            // Clamp to valid cell range
+            if (currCellLine >= variation) currCellLine = variation - 1;
+            if (currCellColumn >= variation) currCellColumn = variation - 1;
 
-            value += interpolation(corner1Value, corner2Value, corner3Value, corner4Value, line, column, linePerCell) * amplitude;
+            currCellIndex = (currCellLine * variation) + currCellColumn;
+
+            Vector2 d0 = d((float)currentColumn, (float)currentLine, cells[currCellIndex].corner0.position.x, cells[currCellIndex].corner0.position.y);
+            Vector2 d1 = d((float)currentColumn, (float)currentLine, cells[currCellIndex].corner1.position.x, cells[currCellIndex].corner1.position.y);
+            Vector2 d2 = d((float)currentColumn, (float)currentLine, cells[currCellIndex].corner2.position.x, cells[currCellIndex].corner2.position.y);
+            Vector2 d3 = d((float)currentColumn, (float)currentLine, cells[currCellIndex].corner3.position.x, cells[currCellIndex].corner3.position.y);
+
+            corner1Value = cells[currCellIndex].corner0.gradientV.x * d0.x + cells[currCellIndex].corner0.gradientV.y * d0.y;
+            corner2Value = cells[currCellIndex].corner1.gradientV.x * d1.x + cells[currCellIndex].corner1.gradientV.y * d1.y;
+            corner3Value = cells[currCellIndex].corner2.gradientV.x * d2.x + cells[currCellIndex].corner2.gradientV.y * d2.y;
+            corner4Value = cells[currCellIndex].corner3.gradientV.x * d3.x + cells[currCellIndex].corner3.gradientV.y * d3.y;
+
+            maxValue += amplitude;
+            value += interpolation(
+                corner1Value, corner2Value, corner3Value, corner4Value,
+                currentLine, currentColumn, currCellLine, currCellColumn,
+                worldSize, variation
+            ) * amplitude;
         }
 
-        map[i] = value; // < 0 ? value + 12 : (variation * 4) * value;
+        int resultado = (int)(value / maxValue); //< 0 ? value + 12 : (variation * 3) * value;
+        map[i] = resultado;
     }
 }
 
