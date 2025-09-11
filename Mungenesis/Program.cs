@@ -135,46 +135,38 @@ namespace PerlinWorld
 
         static void Main(string[] args)
         {
-            int variation = 0;
+            int variation = 15;
             int octave = 9;
             bool flag = false;
             int worldSize = 4320;
             int[] mapFromC = new int[worldSize * worldSize];
             int[,] map = new int[worldSize, worldSize];
-            var sb = new System.Text.StringBuilder();
+            int algorithmChoice;
 
-
-            // Ask user for smoothness level
-            do
-            {
-                Console.WriteLine("In a scale of 1 to 6, how smooth do you want your world to be?\n");
-                Console.WriteLine("1 is a smooth world with subtle terrain variations. 6 is a varied world, with sudden transitions");
-                Console.Write("Insert answer: ");
-
-                if (!int.TryParse(Console.ReadLine(), out variation) || variation < 1 || variation > 500)
-                {
-                    Console.WriteLine("As much as I like new ideas, our developer (myself) hasn't yet figured out how to support this option. Press enter and try again!");
-                    Console.ReadLine();
-                    continue;
-                }
-
-                flag = true;
-
-            } while (!flag);
-
-            flag = false;
-
-            //Adding +1 do variation so if a user chooses 1, the world will be 2x2 squares
-            variation++;
             int squares = (int)Math.Pow(variation, 2);
             int cornerNumber = (int)Math.Pow(variation + 1, 2);
             Vector2[] seed = new Vector2[cornerNumber];
-            string mapString;
 
             World world = new World();
             Corner[] corners = new Corner[cornerNumber];
             Cell[] cells = initializeGrid(squares, cornerNumber, worldSize, out corners);
+            while (true)
+            {
+                Console.WriteLine("What algorithm would you like to use?");
+                Console.WriteLine("1 - Perlin Noise");
+                Console.WriteLine("2 - Pochettini Algorithm (Not available yet)");
 
+                if (int.TryParse(Console.ReadLine(), out algorithmChoice) && algorithmChoice == 1)
+                {
+                    break;
+                }
+                else if (int.TryParse(Console.ReadLine(), out algorithmChoice) && algorithmChoice == 2)
+                {
+                    Console.WriteLine("Are you illiterate? I just told you this algorithm isn't available yet!");
+                }
+
+                Console.WriteLine("Invalid input. Please enter 1 or 2.");
+            }
 
             // Ask user to insert or generate seed
             do
@@ -269,7 +261,7 @@ namespace PerlinWorld
                 Console.WriteLine($"ERROR: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
-            
+
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }

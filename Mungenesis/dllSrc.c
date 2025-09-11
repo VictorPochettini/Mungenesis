@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include "cJSON.h"
 
 // Export macro for DLL
 #ifdef _WIN32

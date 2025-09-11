@@ -75,8 +75,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+seaLevelValue.addEventListener('input', function() {
+    let val = parseInt(seaLevelValue.value, 10);
+    if (isNaN(val)) val = seaLevelSlider.min;
+
+    val = Math.max(parseInt(seaLevelSlider.min, 10), Math.min(parseInt(seaLevelSlider.max, 10), val));
+    seaLevelSlider.value = val;
+    if (typeof worldData !== 'undefined') {
+        canvasManager.drawWorld(worldData, val);
+    }
+});
+
+
 seaLevelSlider.addEventListener('input', function() {
-    seaLevelValue.textContent = seaLevelSlider.value;
+    seaLevelValue.value = seaLevelSlider.value;
     if (typeof worldData !== 'undefined') {
         canvasManager.drawWorld(worldData, parseInt(seaLevelSlider.value, 10));
     }
