@@ -5,75 +5,65 @@ class CanvasManager {
     }
 
     drawWorld(worldData) {
-        let pixelLength = Math.sqrt(worldData.Map.length);
+        const pixelLength = Math.sqrt(worldData.Map.length);
+        const imageData = this.ctx.createImageData(pixelLength, pixelLength);
+        const data = imageData.data;
+
+        // Precompute color mapping for speed
+        const colorMap = [
+            [0, 0, 255],      // <= 0
+            [0, 98, 75],      // < 7
+            [26, 130, 53],    // < 14
+            [76, 157, 65],    // < 21
+            [167, 191, 103],  // < 28
+            [219, 207, 123],  // < 35
+            [200, 151, 74],   // < 42
+            [168, 89, 23],    // < 49
+            [153, 59, 7],     // < 56
+            [134, 37, 30],    // < 70
+            [121, 60, 59],    // < 84
+            [114, 88, 89],    // < 98
+            [176, 176, 176],  // < 112
+            [200, 200, 200],  // < 155
+            [236, 236, 236],  // < 198
+            [255, 255, 255],  // else
+        ];
+
+        function getColor(height) {
+            if (height <= 0) return colorMap[0];
+            else if (height < 7) return colorMap[1];
+            else if (height < 14) return colorMap[2];
+            else if (height < 21) return colorMap[3];
+            else if (height < 28) return colorMap[4];
+            else if (height < 35) return colorMap[5];
+            else if (height < 42) return colorMap[6];
+            else if (height < 49) return colorMap[7];
+            else if (height < 56) return colorMap[8];
+            else if (height < 70) return colorMap[9];
+            else if (height < 84) return colorMap[10];
+            else if (height < 98) return colorMap[11];
+            else if (height < 112) return colorMap[12];
+            else if (height < 155) return colorMap[13];
+            else if (height < 198) return colorMap[14];
+            else return colorMap[15];
+        }
 
         for (let i = 0; i < worldData.Map.length; i++) {
-            let height = worldData.Map[i];
-            console.log("This works");
-
-            // Set color based on height
-            if (height < 0) {
-                this.ctx.fillStyle = '#0000ff';
-            }
-            else if (height < 250) {
-                this.ctx.fillStyle = '#00624b';
-            }
-            else if (height < 500) {
-                this.ctx.fillStyle = '#1a8235';
-            }
-            else if (height < 750) {
-                this.ctx.fillStyle = '#4c9d41';
-            }
-            else if (height < 1000) {
-                this.ctx.fillStyle = '#a7bf67';
-            }
-            else if (height < 1250) {
-                this.ctx.fillStyle = '#dbcf7b';
-            }
-            else if (height < 1500) {
-                this.ctx.fillStyle = '#c8974a';
-            }
-            else if (height < 1750) {
-                this.ctx.fillStyle = '#a85917';
-            }
-            else if (height < 2000) {
-                this.ctx.fillStyle = '#993b07';
-            }
-            else if (height < 2500) {
-                this.ctx.fillStyle = '#86251e';
-            }
-            else if (height < 3000) {
-                this.ctx.fillStyle = '#793c3b';
-            }
-            else if (height < 3500) {
-                this.ctx.fillStyle = '#725859';
-            }
-            else if (height < 4000) {
-                this.ctx.fillStyle = '#b0b0b0';
-            }
-            else if (height < 5500) {
-                this.ctx.fillStyle = '#c8c8c8';
-            }
-            else if (height < 7000) {
-                this.ctx.fillStyle = '#ececec';
-            }
-            else {
-                this.ctx.fillStyle = '#ffffff';
-            }
-
-            // Calculate x, y coordinates
-            let x = i % pixelLength;
-            let y = Math.floor(i / pixelLength);
-            this.ctx.fillRect(x, y, 1, 1);
+            const color = getColor(worldData.Map[i]);
+            const idx = i * 4;
+            data[idx] = color[0];     // R
+            data[idx + 1] = color[1]; // G
+            data[idx + 2] = color[2]; // B
+            data[idx + 3] = 255;      // A
         }
+
+        this.ctx.putImageData(imageData, 0, 0);
     }
 }
 
 const canvas = document.getElementById('canvas');
 const canvasManager = new CanvasManager(canvas);
 
-// Remove the fetch code and replace with:
-// Wait for the DOM to be fully loaded, then check if worldData exists
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof worldData !== 'undefined') {
         canvasManager.drawWorld(worldData);

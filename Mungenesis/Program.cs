@@ -91,7 +91,7 @@ namespace PerlinWorld
     class Program
     {
         [DllImport("MyCLibrary.dll")]
-        public static extern unsafe void DotGrid(BlittableCell* cells, int worldSize, int* map, int layer);
+        public static extern unsafe void PerlinNoise(BlittableCell* cells, int worldSize, int* map, int layer, int octave);
 
         [DllImport("MyCLibrary.dll")]
         public static extern void generateSeed([Out] Vector2[] seed, int cornerNumber);
@@ -111,8 +111,8 @@ namespace PerlinWorld
                 Corner c = new Corner(i);
                 c.position = new Vector2
                 {
-                    X = (i % cornerPerLength) * (worldSize / length),
-                    Y = (i / cornerPerLength) * (worldSize / length)
+                    X = (float)(i % cornerPerLength) * ((float)worldSize / (cornerPerLength - 1)),
+                    Y = (float)(i / cornerPerLength) * ((float)worldSize / (cornerPerLength - 1))
                 };
                 corners[i] = c;
             }
@@ -136,13 +136,13 @@ namespace PerlinWorld
         static void Main(string[] args)
         {
             int variation = 0;
+            int octave = 9;
             bool flag = false;
-            int worldSize = 1080; // Temporarily reduce size for testing
+            int worldSize = 4320;
             int[] mapFromC = new int[worldSize * worldSize];
             int[,] map = new int[worldSize, worldSize];
             var sb = new System.Text.StringBuilder();
 
-            Console.WriteLine("Testing with smaller world size first...");
 
             // Ask user for smoothness level
             do
@@ -227,7 +227,7 @@ namespace PerlinWorld
                 fixed (int* mapPtr = mapFromC)
                 {
                     Console.WriteLine("Calling DotGrid...");
-                    DotGrid(ptr, worldSize, mapPtr, variation);
+                    PerlinNoise(ptr, worldSize, mapPtr, variation, octave);
                     Console.WriteLine("DotGrid completed.");
                 }
             }
