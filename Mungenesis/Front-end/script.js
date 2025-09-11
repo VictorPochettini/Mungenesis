@@ -4,14 +4,14 @@ class CanvasManager {
         this.ctx = this.canvas.getContext('2d');
     }
 
-    drawWorld(worldData) {
+    drawWorld(worldData, seaLevel = 0) {
         const pixelLength = Math.sqrt(worldData.Map.length);
         const imageData = this.ctx.createImageData(pixelLength, pixelLength);
         const data = imageData.data;
 
         // Precompute color mapping for speed
         const colorMap = [
-            [0, 0, 255],      // <= 0
+            [0, 0, 255],      // sea
             [0, 98, 75],      // < 7
             [26, 130, 53],    // < 14
             [76, 157, 65],    // < 21
@@ -30,7 +30,7 @@ class CanvasManager {
         ];
 
         function getColor(height) {
-            if (height <= 0) return colorMap[0];
+            if (height <= seaLevel) return colorMap[0];
             else if (height < 7) return colorMap[1];
             else if (height < 14) return colorMap[2];
             else if (height < 21) return colorMap[3];
@@ -64,10 +64,20 @@ class CanvasManager {
 const canvas = document.getElementById('canvas');
 const canvasManager = new CanvasManager(canvas);
 
+const seaLevelSlider = document.getElementById('seaLevel');
+const seaLevelValue = document.getElementById('seaLevelValue');
+
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof worldData !== 'undefined') {
-        canvasManager.drawWorld(worldData);
+        canvasManager.drawWorld(worldData, parseInt(seaLevelSlider.value, 10));
     } else {
         console.error('World data not loaded. Make sure world.js is properly generated.');
+    }
+});
+
+seaLevelSlider.addEventListener('input', function() {
+    seaLevelValue.textContent = seaLevelSlider.value;
+    if (typeof worldData !== 'undefined') {
+        canvasManager.drawWorld(worldData, parseInt(seaLevelSlider.value, 10));
     }
 });
