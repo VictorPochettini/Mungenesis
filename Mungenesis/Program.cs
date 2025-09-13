@@ -3,6 +3,7 @@ using System.Data;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.IO;
+using System.Diagnostics;
 
 namespace PerlinWorld
 {
@@ -105,14 +106,15 @@ namespace PerlinWorld
             int cornerPerLength = length + 1;
             corners = new Corner[cornerNumber];
             Cell[] cells = new Cell[squares];
+            float spacing = (float)(worldSize - 1) / (cornerPerLength - 1);
 
             for (int i = 0; i < cornerNumber; i++)
             {
                 Corner c = new Corner(i);
                 c.position = new Vector2
                 {
-                    X = (float)(i % cornerPerLength) * ((float)worldSize / (cornerPerLength - 1)),
-                    Y = (float)(i / cornerPerLength) * ((float)worldSize / (cornerPerLength - 1))
+                    X = (float)(i % cornerPerLength) * spacing,
+                    Y = (float)(i / cornerPerLength) * spacing
                 };
                 corners[i] = c;
             }
@@ -136,7 +138,7 @@ namespace PerlinWorld
         static void Main(string[] args)
         {
             int variation = 15;
-            int octave = 9;
+            int octave = 8;
             bool flag = false;
             int worldSize = 4320;
             int[] mapFromC = new int[worldSize * worldSize];
@@ -261,6 +263,13 @@ namespace PerlinWorld
                 Console.WriteLine($"ERROR: {ex.Message}");
                 Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
+
+            string localPath = Path.GetFullPath("Front-end/index.html");
+            Process.Start( new ProcessStartInfo
+            {
+                FileName = localPath,
+                UseShellExecute = true
+            });
 
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();

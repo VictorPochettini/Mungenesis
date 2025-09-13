@@ -12,6 +12,9 @@ class CanvasManager {
         // Precompute color mapping for speed
         const colorMap = [
             [0, 0, 255],      // sea
+            [25, 47, 35],    // < -14
+            [10, 61, 33],     // < -7
+            [4, 84, 39],      // < 0
             [0, 98, 75],      // < 7
             [26, 130, 53],    // < 14
             [76, 157, 65],    // < 21
@@ -31,21 +34,24 @@ class CanvasManager {
 
         function getColor(height) {
             if (height <= seaLevel) return colorMap[0];
-            else if (height < 7) return colorMap[1];
-            else if (height < 14) return colorMap[2];
-            else if (height < 21) return colorMap[3];
-            else if (height < 28) return colorMap[4];
-            else if (height < 35) return colorMap[5];
-            else if (height < 42) return colorMap[6];
-            else if (height < 49) return colorMap[7];
-            else if (height < 56) return colorMap[8];
-            else if (height < 70) return colorMap[9];
-            else if (height < 84) return colorMap[10];
-            else if (height < 98) return colorMap[11];
-            else if (height < 112) return colorMap[12];
-            else if (height < 155) return colorMap[13];
-            else if (height < 198) return colorMap[14];
-            else return colorMap[15];
+            else if (height < -14) return colorMap[1];
+            else if (height < -7) return colorMap[2];
+            else if (height < 0) return colorMap[3];
+            else if (height < 7) return colorMap[4];
+            else if (height < 14) return colorMap[5];
+            else if (height < 21) return colorMap[6];
+            else if (height < 28) return colorMap[7];
+            else if (height < 35) return colorMap[8];
+            else if (height < 42) return colorMap[9];
+            else if (height < 49) return colorMap[10];
+            else if (height < 56) return colorMap[11];
+            else if (height < 70) return colorMap[12];
+            else if (height < 84) return colorMap[13];
+            else if (height < 98) return colorMap[14];
+            else if (height < 112) return colorMap[15];
+            else if (height < 155) return colorMap[16];
+            else if (height < 198) return colorMap[17];
+            else return colorMap[18];
         }
 
         for (let i = 0; i < worldData.Map.length; i++) {
@@ -94,3 +100,7 @@ seaLevelSlider.addEventListener('input', function() {
         canvasManager.drawWorld(worldData, parseInt(seaLevelSlider.value, 10));
     }
 });
+
+canvas.addEventListener('click', function(event) {
+    console.log('Canvas clicked at:', event.offsetX, event.offsetY);
+})

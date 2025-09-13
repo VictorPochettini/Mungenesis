@@ -34,6 +34,15 @@ typedef struct
     int layer;
 } BlittableCell;
 
+typedef struct
+{
+    int id;
+    int plateId;
+    int plateType; // 0 for oceanic, 1 for continental
+    Vector2 position;
+} BlittablePlate;
+
+
 Vector2 d(float x, float y, float x0, float y0)
 {
     Vector2 result;
@@ -56,8 +65,7 @@ float lerp(float a, float b, float t)
 float interpolation(
     float corner1Value, float corner2Value, float corner3Value, float corner4Value,
     int line, int column, int cellLine, int cellColumn,
-    int worldSize, int variation
-)
+    int worldSize, int variation)
 {
     // Calculate position within the current cell (0.0 to 1.0)
     float cellWidth = (float)worldSize / variation;
@@ -66,10 +74,14 @@ float interpolation(
     float localX = ((float)column - (cellColumn * cellWidth)) / cellWidth;
     float localY = ((float)line - (cellLine * cellHeight)) / cellHeight;
 
-    if (localX < 0.0f) localX = 0.0f;
-    if (localX > 1.0f) localX = 1.0f;
-    if (localY < 0.0f) localY = 0.0f;
-    if (localY > 1.0f) localY = 1.0f;
+    if (localX < 0.0f)
+        localX = 0.0f;
+    if (localX > 1.0f)
+        localX = 1.0f;
+    if (localY < 0.0f)
+        localY = 0.0f;
+    if (localY > 1.0f)
+        localY = 1.0f;
 
     // Apply fade function for smooth interpolation
     float u = fade(localX);
@@ -92,14 +104,14 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
     int column;
     int currentLine;
     int currentColumn;
-    int cellLine;
-    int cellColumn;
     int cellIndex;
     int currCellLine;
     int currCellColumn;
     int currCellIndex;
-    int frequency;
     int total;
+    float cellLine;
+    float cellColumn;
+    float frequency;
     float maxValue;
     float amplitude;
     float value;
@@ -111,7 +123,7 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
     {
         value = 0.0;
         maxValue = 0.0;
-        frequency = 2.0;
+        frequency = 2.0f;
         line = i / worldSize;
         column = i % worldSize;
         cellLine = line / linePerCell;
@@ -120,17 +132,41 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
 
         for (int j = 0; j < octave; j++)
         {
-            frequency = 1 << j;
+            frequency = powf(2.0, (float)j);
             amplitude = powf(persistence, (float)j);
 
-            currentLine = (line * frequency) % worldSize;
-            currentColumn = (column * frequency) % worldSize;
+            int a = (int)(line * frequency);
+            int b = (int)(column * frequency);
+            int l = line;
+            int c = column;
+            /*
+            do
+            {
+                
+                if(a % worldSize == 0)
+                {
+                    l -= 10;
+                    a = l * frequency;
+                }
+                if(b % worldSize == 0)
+                {
+                    c -= 10;
+                    b = c * frequency;
+                }
+
+            } while (a % worldSize == 0 || b % worldSize == 0);
+            */
+
+            currentLine = a % worldSize;
+            currentColumn = b % worldSize;
             currCellLine = currentLine / linePerCell;
             currCellColumn = currentColumn / linePerCell;
 
             // Clamp to valid cell range
-            if (currCellLine >= variation) currCellLine = variation - 1;
-            if (currCellColumn >= variation) currCellColumn = variation - 1;
+            if (currCellLine >= variation)
+                currCellLine = variation - 1;
+            if (currCellColumn >= variation)
+                currCellColumn = variation - 1;
 
             currCellIndex = (currCellLine * variation) + currCellColumn;
 
@@ -146,10 +182,10 @@ EXPORT void PerlinNoise(BlittableCell *cells, int worldSize, int *map, int varia
 
             maxValue += amplitude;
             value += interpolation(
-                corner1Value, corner2Value, corner3Value, corner4Value,
-                currentLine, currentColumn, currCellLine, currCellColumn,
-                worldSize, variation
-            ) * amplitude;
+                         corner1Value, corner2Value, corner3Value, corner4Value,
+                         currentLine, currentColumn, currCellLine, currCellColumn,
+                         worldSize, variation) *
+                     amplitude;
         }
 
         int resultado = (int)(value / maxValue); //< 0 ? value + 12 : (variation * 3) * value;
@@ -187,4 +223,91 @@ EXPORT void freeSeed(void *ptr)
     {
         free(ptr);
     }
+}
+
+//POCHETTINI ALGORITHM ==========================================================================================================================
+
+void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
+{
+    int above = adjacents[0].plateId;
+    int below = adjacents[1].plateId;
+    int left = adjacents[2].plateId;
+    int right = adjacents[3].plateId;
+    int counter[4] = {0, 0, 0, 0};
+    int maior = 0;
+
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4; j++)
+        {
+            if(adjacents[i].plateId == adjacents[j].plateId && i != j && adjacents[i].plateId != 0)
+            {
+                counter[i]++;
+            }
+        }
+    }
+
+    for(int i = 0; i < 4; i++)
+    {
+        if(counter[i] > 2)
+        {
+            plate->plateId = adjacents[i].plateId;
+            plate->plateType = adjacents[i].plateType;
+            return;
+        }
+        else
+        {
+            for(int j = 0; j < 4; j++)
+            {
+                if(counter[j] > maior)
+                {
+                    maior = counter[j];
+                    plate->plateId = adjacents[j].plateId;
+                    plate->plateType = adjacents[j].plateType;
+                }
+            }
+        }
+    }
+
+}
+
+EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int* map)
+{
+    int platesNumber = 9;
+    int line, column;
+    BlittablePlate above, below, left, right;
+
+    // Defines where the plates will be initially positioned
+    for(int i = 0; i < 9; i++)
+    {
+        int initialIndex = rand() % (worldSize * worldSize);
+        plates[initialIndex].plateId = i;
+        if(rand() % 10 < 3) // 30% chance to be type 0
+        {
+            plates[initialIndex].plateType = 0;
+        }
+        else
+        {
+            plates[initialIndex].plateType = 1;
+        }
+    }
+
+    // Fills the rest of the map with plates
+    for(int i = 0; i < worldSize * worldSize; i++)
+    {
+        line = i / worldSize;
+        column = i % worldSize;
+
+        above = plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
+        below = plates[((line + 1) % worldSize) * worldSize + column];
+        left = plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
+        right = plates[line * worldSize + ((column + 1) % worldSize)];
+
+        BlittablePlate adjacents[4] = {above, below, left, right};
+        checkAdjecent(&plates[i], plates, worldSize, adjacents);
+    }
+
+
+    
+    
 }
