@@ -86,6 +86,13 @@ namespace PerlinWorld
         public Vector2 gradientV;
         public Vector2 position;
     }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct BlittablePlate
+    {
+        public int id;
+        public int plateId;
+        public int plateType; // 0 for oceanic, 1 for continental
+    }
 
 
 
@@ -93,6 +100,8 @@ namespace PerlinWorld
     {
         [DllImport("MyCLibrary.dll")]
         public static extern unsafe void PerlinNoise(BlittableCell* cells, int worldSize, int* map, int layer, int octave);
+        [DllImport("MyCLibrary.dll")]
+        public static extern unsafe void PochettiniAlgorithm(BlittablePlate* plates, int worldSize, int* map);
 
         [DllImport("MyCLibrary.dll")]
         public static extern void generateSeed([Out] Vector2[] seed, int cornerNumber);
@@ -135,19 +144,21 @@ namespace PerlinWorld
             return cells;
         }
 
+
         static void Main(string[] args)
         {
-            int variation = 15;
+            int variation = 40;
             int octave = 8;
             bool flag = false;
-            int worldSize = 4320;
+            int worldSize = 8640;
             int[] mapFromC = new int[worldSize * worldSize];
             int[,] map = new int[worldSize, worldSize];
-            int algorithmChoice;
+            int algorithmChoice = 0;
 
             int squares = (int)Math.Pow(variation, 2);
             int cornerNumber = (int)Math.Pow(variation + 1, 2);
             Vector2[] seed = new Vector2[cornerNumber];
+            var objec = new { Type = algorithmChoice, Seed = seed, Map = mapFromC, Variation = variation - 1, WorldSize = worldSize };
 
             World world = new World();
             Corner[] corners = new Corner[cornerNumber];
@@ -165,72 +176,103 @@ namespace PerlinWorld
                 else if (int.TryParse(Console.ReadLine(), out algorithmChoice) && algorithmChoice == 2)
                 {
                     Console.WriteLine("Are you illiterate? I just told you this algorithm isn't available yet!");
+                    break;
                 }
 
                 Console.WriteLine("Invalid input. Please enter 1 or 2.");
             }
 
             // Ask user to insert or generate seed
-            do
+            if (algorithmChoice == 1)
             {
-                Console.WriteLine("Would you like to insert a seed (1) or generate one (2)?");
-                int choice;
-                if (!int.TryParse(Console.ReadLine(), out choice))
+                do
                 {
-                    Console.WriteLine("Invalid input. Please enter 1 or 2.");
-                    continue;
+                    Console.WriteLine("Would you like to insert a seed (1) or generate one (2)?");
+                    int choice;
+                    if (!int.TryParse(Console.ReadLine(), out choice))
+                    {
+                        Console.WriteLine("Invalid input. Please enter 1 or 2.");
+                        continue;
+                    }
+
+                    switch (choice)
+                    {
+                        case 1:
+                            Console.WriteLine("Insert seed:");
+                            //I have to see what I can do here
+                            flag = true;
+                            break;
+
+                        case 2:
+                            generateSeed(seed, cornerNumber);
+                            flag = true;
+                            break;
+
+                        default:
+                            Console.WriteLine("Choose a valid option, please. This is adult talking.");
+                            break;
+                    }
+
+                    foreach (Corner corner in corners)
+                    {
+                        corner.gradientV = seed[corner.id];
+                    }
+
+                } while (!flag);
+
+                BlittableCell[] blittableCells = new BlittableCell[cells.Length];
+
+                for (int i = 0; i < cells.Length; i++)
+                {
+                    BlittableCell blittableCell = cells[i].ToBlittable();
+                    blittableCells[i] = blittableCell;
                 }
 
-                switch (choice)
+                unsafe
                 {
-                    case 1:
-                        Console.WriteLine("Insert seed:");
-                        //I have to see what I can do here
-                        flag = true;
-                        break;
 
-                    case 2:
-                        generateSeed(seed, cornerNumber);
-                        flag = true;
-                        break;
-
-                    default:
-                        Console.WriteLine("Choose a valid option, please. This is adult talking.");
-                        break;
+                    fixed (BlittableCell* ptr = blittableCells)
+                    fixed (int* mapPtr = mapFromC)
+                    {
+                        Console.WriteLine("Calling DotGrid...");
+                        PerlinNoise(ptr, worldSize, mapPtr, variation, octave);
+                        Console.WriteLine("DotGrid completed.");
+                    }
                 }
 
-                foreach (Corner corner in corners)
-                {
-                    corner.gradientV = seed[corner.id];
-                }
-
-            } while (!flag);
-
-            BlittableCell[] blittableCells = new BlittableCell[cells.Length];
-
-            for (int i = 0; i < cells.Length; i++)
+                // Debug: Check if map has values
+                Console.WriteLine($"First map values: {mapFromC[0]}, {mapFromC[1]}, {mapFromC[2]}");
+                Console.WriteLine($"Some middle values: {mapFromC[1000]}, {mapFromC[2000]}, {mapFromC[3000]}");
+            }
+            else
             {
-                BlittableCell blittableCell = cells[i].ToBlittable();
-                blittableCells[i] = blittableCell;
+                Console.WriteLine("You really are illiterate, aren't you?");
+                BlittablePlate[] plates = new BlittablePlate[worldSize * worldSize];
+                for (int i = 0; i < plates.Length; i++)
+                {
+                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 2 };
+                }
+
+                unsafe
+                {
+                    fixed (BlittablePlate* ptr = plates)
+                    fixed (int* mapPtr = mapFromC)
+                    {
+                        Console.WriteLine("Calling PochettiniAlgorithm...");
+                        PochettiniAlgorithm(ptr, worldSize, mapPtr);
+                        Console.WriteLine("PochettiniAlgorithm completed.");
+                    }
+                }
             }
 
-            unsafe
+            if (algorithmChoice == 1)
             {
-
-                fixed (BlittableCell* ptr = blittableCells)
-                fixed (int* mapPtr = mapFromC)
-                {
-                    Console.WriteLine("Calling DotGrid...");
-                    PerlinNoise(ptr, worldSize, mapPtr, variation, octave);
-                    Console.WriteLine("DotGrid completed.");
-                }
+                objec = new { Type = algorithmChoice, Seed = seed, Map = mapFromC, Variation = variation - 1, WorldSize = worldSize };
             }
-
-            // Debug: Check if map has values
-            Console.WriteLine($"First map values: {mapFromC[0]}, {mapFromC[1]}, {mapFromC[2]}");
-            Console.WriteLine($"Some middle values: {mapFromC[1000]}, {mapFromC[2000]}, {mapFromC[3000]}");
-
-            var objec = new { Seed = seed, Map = mapFromC, Variation = variation - 1, WorldSize = worldSize };
+            else
+            {
+                objec = new { Type = algorithmChoice, Seed = seed, Map = mapFromC, Variation = variation - 1, WorldSize = worldSize };
+            }
             Console.WriteLine("Creating JSON...");
 
             try
@@ -265,7 +307,7 @@ namespace PerlinWorld
             }
 
             string localPath = Path.GetFullPath("Front-end/index.html");
-            Process.Start( new ProcessStartInfo
+            Process.Start(new ProcessStartInfo
             {
                 FileName = localPath,
                 UseShellExecute = true

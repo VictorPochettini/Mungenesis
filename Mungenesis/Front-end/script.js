@@ -32,6 +32,19 @@ class CanvasManager {
             [255, 255, 255],  // else
         ];
 
+        const PochettiniColorMap = [
+            [255, 255, 255], //No plate
+            [255, 0, 0],     //Plate 1
+            [0, 255, 0],     //Plate 2
+            [0, 0, 255],     //Plate 3
+            [255, 255, 0],   //Plate 4
+            [0, 255, 255],   //Plate 5
+            [255, 0, 255],   //Plate 6
+            [192, 192, 192], //Plate 7
+            [128, 0, 0],     //Plate 8
+            [128, 128, 0],   //Plate 9
+        ];
+
         function getColor(height) {
             if (height <= seaLevel) return colorMap[0];
             else if (height < -14) return colorMap[1];
@@ -52,6 +65,10 @@ class CanvasManager {
             else if (height < 155) return colorMap[16];
             else if (height < 198) return colorMap[17];
             else return colorMap[18];
+        }
+
+        function getPochettiniColor(plateId) {
+            return PochettiniColorMap[plateId];
         }
 
         for (let i = 0; i < worldData.Map.length; i++) {
