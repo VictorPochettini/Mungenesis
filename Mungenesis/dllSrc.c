@@ -245,6 +245,11 @@ int checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, 
         }
     }
 
+    if(counter[0] == 4 && adjacents[0] == 0)
+    {
+        return 0;
+    }
+
     for (int i = 0; i < 4; i++)
     {
         if (counter[i] > 2)
