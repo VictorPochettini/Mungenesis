@@ -225,7 +225,7 @@ EXPORT void freeSeed(void *ptr)
 
 // POCHETTINI ALGORITHM ==========================================================================================================================
 
-int checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
+void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
 {
     int above = adjacents[0].plateId;
     int below = adjacents[1].plateId;
@@ -247,7 +247,7 @@ int checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, 
 
     if(counter[0] == 4 && adjacents[0] == 0)
     {
-        return 0;
+        return;
     }
 
     for (int i = 0; i < 4; i++)
@@ -258,18 +258,16 @@ int checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, 
             plate->plateType = adjacents[i].plateType;
             return;
         }
-        else
-        {
-            for (int j = 0; j < 4; j++)
+    }
+        for (int j = 0; j < 4; j++)
             {
                 if (counter[j] > maior)
                 {
                     maior = counter[j];
-                    plate->plateId = adjacents[j].plateId;
-                    plate->plateType = adjacents[j].plateType;
                 }
             }
-        }
+        plate->plateId = adjacents[maior].plateId;
+        plate->plateType = adjacents[maior].plateType;
     }
 }
 
