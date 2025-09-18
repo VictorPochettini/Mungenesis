@@ -71,8 +71,9 @@ class CanvasManager {
             return PochettiniColorMap[plateId];
         }
 // I have to think how I'll actually get the plateId from the JSON (the main problem actually lies on knowing how I'll store it)
+//I'll use a separate JSON I think, which means i should change the class
         for (let i = 0; i < worldData.Map.length; i++) {
-            const color = worldData.algorithmChoice == 2 ? getPochettiniColor(worldData.plateId) : getColor(worldData.Map[i]);
+            const color = worldData.algorithmChoice == 2 ? getPochettiniColor(worldIds.plateId) : getColor(worldData.Map[i]);
             const idx = i * 4;
             data[idx] = color[0];     // R
             data[idx + 1] = color[1]; // G
