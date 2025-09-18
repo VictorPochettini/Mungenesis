@@ -227,6 +227,17 @@ EXPORT void freeSeed(void *ptr)
 
 void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
 {
+    for(int i = 0; i < 4; i++)
+    {
+        int j = rand() % 4;
+        if(adjacents[j].plateId != 0)
+        {
+            plate->plateId = adjacents[j].plateId;
+            plate->plateType = adjacents[j].plateType;
+            return;
+        }
+    }
+    /*
     int above = adjacents[0].plateId;
     int below = adjacents[1].plateId;
     int left = adjacents[2].plateId;
@@ -245,30 +256,25 @@ void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize,
         }
     }
 
-    if(counter[0] == 4 && adjacents[0] == 0)
-    {
-        return;
-    }
-
     for (int i = 0; i < 4; i++)
     {
-        if (counter[i] > 2)
+        if (counter[i] > 2 && adjacents[i].plateId != 0)
         {
             plate->plateId = adjacents[i].plateId;
             plate->plateType = adjacents[i].plateType;
             return;
         }
     }
-        for (int j = 0; j < 4; j++)
-            {
-                if (counter[j] > maior)
-                {
-                    maior = counter[j];
-                }
-            }
-        plate->plateId = adjacents[maior].plateId;
-        plate->plateType = adjacents[maior].plateType;
+    for (int j = 0; j < 4; j++)
+    {
+        if (counter[j] > maior && adjacents[j].plateId != 0)
+        {
+            maior = counter[j];
+        }
     }
+    plate->plateId = adjacents[maior].plateId;
+    plate->plateType = adjacents[maior].plateType;
+    */
 }
 
 EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
@@ -276,12 +282,13 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     int platesNumber = 9;
     int line, column;
     int flag = 1;
+    int worldArea = worldSize * worldSize;
     BlittablePlate above, below, left, right;
 
     // Defines where the plates will be initially positioned
     for (int i = 0; i < 9; i++)
     {
-        int initialIndex = rand() % (worldSize * worldSize);
+        int initialIndex = rand() % (worldArea);
         plates[initialIndex].plateId = i;
         if (rand() % 10 < 3) // 30% chance to be type 0
         {
@@ -296,8 +303,14 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     // Fills the rest of the map with plates
     while (flag)
     {
-        for (int i = 0; i < worldSize * worldSize; i++)
+        flag = 1;
+        for (int i = 0; i < worldArea; i++)
         {
+            if(plates[i].plateId != 0)
+            {
+                continue;
+            }
+            
             line = i / worldSize;
             column = i % worldSize;
 
@@ -308,6 +321,7 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
 
             BlittablePlate adjacents[4] = {above, below, left, right};
             checkAdjecent(&plates[i], plates, worldSize, adjacents);
+            map[i] = plates[i].plateId;
             if (plates[i].plateId == 0)
             {
                 flag = 0;

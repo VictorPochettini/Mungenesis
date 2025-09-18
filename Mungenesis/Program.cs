@@ -168,21 +168,17 @@ namespace PerlinWorld
                 Console.WriteLine("What algorithm would you like to use?");
                 Console.WriteLine("1 - Perlin Noise");
                 Console.WriteLine("2 - Pochettini Algorithm (Not available yet)");
+                int opçao = int.Parse(Console.ReadLine());
+                algorithmChoice = opçao;
 
-                if (int.TryParse(Console.ReadLine(), out algorithmChoice) && algorithmChoice == 1)
+                if (opçao == 1 || opçao == 2)
                 {
-                    break;
-                }
-                else if (int.TryParse(Console.ReadLine(), out algorithmChoice) && algorithmChoice == 2)
-                {
-                    Console.WriteLine("Are you illiterate? I just told you this algorithm isn't available yet!");
                     break;
                 }
 
                 Console.WriteLine("Invalid input. Please enter 1 or 2.");
             }
-
-            // Ask user to insert or generate seed
+            
             if (algorithmChoice == 1)
             {
                 do
@@ -250,7 +246,7 @@ namespace PerlinWorld
                 BlittablePlate[] plates = new BlittablePlate[worldSize * worldSize];
                 for (int i = 0; i < plates.Length; i++)
                 {
-                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 2 };
+                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 0 }; // Use 0 (oceanic) or 1 (continental)
                 }
 
                 unsafe
