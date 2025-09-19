@@ -227,7 +227,6 @@ EXPORT void freeSeed(void *ptr)
 
 void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
 {
-    int acc = 0;
     for (int i = 0; i < 4; i++)
     {
         if (adjacents[i].plateId != 0)
@@ -235,17 +234,8 @@ void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize,
             plate->plateId = adjacents[i].plateId;
             plate->plateType = adjacents[i].plateType;
         }
-        else
-        {
-            acc++;
-        }
     }
-    if(acc == 4)
-    {
-        plate->plateId = 0;
-        plate->plateType = 0;
-        return;
-    }
+
     /*
     for(int i = 0; i < 4; i++)
     {
@@ -302,7 +292,9 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     int line, column;
     int flag = 1;
     int worldArea = worldSize * worldSize;
+    float percentage = 0.0f;
     BlittablePlate above, below, left, right;
+    BlittablePlate adjacents[4];
     srand(time(NULL));
 
     // Defines where the plates will be initially positioned
@@ -337,13 +329,50 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
 
             line = i / worldSize;
             column = i % worldSize;
+            percentage = (float)i / (float)(worldArea) * 100.0f;
 
             above = plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
             below = plates[((line + 1) % worldSize) * worldSize + column];
             left = plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
             right = plates[line * worldSize + ((column + 1) % worldSize)];
 
-            BlittablePlate adjacents[4] = {above, left, below, right};
+            if(percentage < 20)
+            {
+                adjacents[0] = below;
+                adjacents[1] = above;
+                adjacents[2] = left;
+                adjacents[3] = right;
+            }
+            else if(percentage >= 20 && percentage < 40)
+            {
+                adjacents[0] = left;
+                adjacents[1] = right;
+                adjacents[2] = above;
+                adjacents[3] = below;
+            }
+            else if(percentage >= 40 && percentage < 60)
+            {
+                adjacents[0] = right;
+                adjacents[1] = left;
+                adjacents[2] = below;
+                adjacents[3] = above;
+            }
+            else if(percentage >= 60 && percentage < 80)
+            {
+                adjacents[0] = above;
+                adjacents[1] = below;
+                adjacents[2] = right;
+                adjacents[3] = left;
+            }
+            else
+            {
+                int randIndex = rand() % 4;
+                adjacents[0] = adjacents[randIndex];
+                adjacents[1] = adjacents[(randIndex + 1) % 4];
+                adjacents[2] = adjacents[(randIndex + 2) % 4];
+                adjacents[3] = adjacents[(randIndex + 3) % 4];
+            }
+
             checkAdjecent(&plates[i], plates, worldSize, adjacents);
             map[i] = plates[i].plateId;
         }
