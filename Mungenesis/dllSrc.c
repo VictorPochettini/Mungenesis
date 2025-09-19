@@ -227,17 +227,36 @@ EXPORT void freeSeed(void *ptr)
 
 void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
 {
+    int acc = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        if (adjacents[i].plateId != 0)
+        {
+            plate->plateId = adjacents[i].plateId;
+            plate->plateType = adjacents[i].plateType;
+        }
+        else
+        {
+            acc++;
+        }
+    }
+    if(acc == 4)
+    {
+        plate->plateId = 0;
+        plate->plateType = 0;
+        return;
+    }
+    /*
     for(int i = 0; i < 4; i++)
     {
-        int j = rand() % 4;
-        if(adjacents[j].plateId != 0)
+        if(adjacents[i].plateId != 0)
         {
-            plate->plateId = adjacents[j].plateId;
-            plate->plateType = adjacents[j].plateType;
+            plate->plateId = adjacents[i].plateId;
+            plate->plateType = adjacents[i].plateType;
             return;
         }
     }
-    /*
+
     int above = adjacents[0].plateId;
     int below = adjacents[1].plateId;
     int left = adjacents[2].plateId;
@@ -284,6 +303,7 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     int flag = 1;
     int worldArea = worldSize * worldSize;
     BlittablePlate above, below, left, right;
+    srand(time(NULL));
 
     // Defines where the plates will be initially positioned
     for (int i = 0; i < 9; i++)
@@ -306,11 +326,15 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
         flag = 1;
         for (int i = 0; i < worldArea; i++)
         {
-            if(plates[i].plateId != 0)
+            if (plates[i].plateId != 0)
             {
                 continue;
             }
-            
+            if (plates[i].plateId == 0)
+            {
+                flag = 0;
+            }
+
             line = i / worldSize;
             column = i % worldSize;
 
@@ -319,13 +343,9 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
             left = plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
             right = plates[line * worldSize + ((column + 1) % worldSize)];
 
-            BlittablePlate adjacents[4] = {above, below, left, right};
+            BlittablePlate adjacents[4] = {above, left, below, right};
             checkAdjecent(&plates[i], plates, worldSize, adjacents);
             map[i] = plates[i].plateId;
-            if (plates[i].plateId == 0)
-            {
-                flag = 0;
-            }
         }
     }
 }
