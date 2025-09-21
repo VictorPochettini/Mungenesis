@@ -227,12 +227,17 @@ EXPORT void freeSeed(void *ptr)
 
 void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate adjacents[4])
 {
+    if(plate->plateId != 0)
+    {
+        return;
+    }
     for (int i = 0; i < 4; i++)
     {
-        if (adjacents[i].plateId != 0)
+        if(adjacents[i].plateId != 0)
         {
-            plate->plateId = adjacents[i].plateId;
-            plate->plateType = adjacents[i].plateType;
+            adjacents[i].plateId = plate->plateId;
+            adjacents[i].plateType = plate->plateType;
+            return;
         }
     }
 

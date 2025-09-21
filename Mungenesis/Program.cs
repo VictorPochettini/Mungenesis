@@ -246,7 +246,7 @@ namespace PerlinWorld
                 BlittablePlate[] plates = new BlittablePlate[worldSize * worldSize];
                 for (int i = 0; i < plates.Length; i++)
                 {
-                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 0 }; // Use 0 (oceanic) or 1 (continental)
+                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 0}; // Use 0 (oceanic) or 1 (continental)
                 }
 
                 unsafe
