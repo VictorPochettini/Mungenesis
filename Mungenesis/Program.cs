@@ -92,6 +92,7 @@ namespace PerlinWorld
         public int id;
         public int plateId;
         public int plateType; // 0 for oceanic, 1 for continental
+        public int coolDown;
     }
 
 
