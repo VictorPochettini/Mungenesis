@@ -230,6 +230,7 @@ void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize,
 {
     if(plate->plateId == 0 || plate->coolDown == 1)
     {
+        plate->coolDown = 0;
         return;
     }
 
@@ -326,13 +327,10 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
         flag = 1;
         for (int i = 0; i < worldArea; i++)
         {
-            if (plates[i].plateId != 0)
-            {
-                continue;
-            }
             if (plates[i].plateId == 0)
             {
                 flag = 0;
+                continue;
             }
 
             line = i / worldSize;
