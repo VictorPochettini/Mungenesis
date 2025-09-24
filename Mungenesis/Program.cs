@@ -151,7 +151,7 @@ namespace PerlinWorld
             int variation = 40;
             int octave = 8;
             bool flag = false;
-            int worldSize = 8640;
+            int worldSize = 2160;
             int[] mapFromC = new int[worldSize * worldSize];
             int[,] map = new int[worldSize, worldSize];
             int algorithmChoice = 0;
@@ -247,7 +247,7 @@ namespace PerlinWorld
                 BlittablePlate[] plates = new BlittablePlate[worldSize * worldSize];
                 for (int i = 0; i < plates.Length; i++)
                 {
-                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 0}; // Use 0 (oceanic) or 1 (continental)
+                    plates[i] = new BlittablePlate { id = i, plateId = 0, plateType = 0, coolDown = 0}; // Use 0 (oceanic) or 1 (continental)
                 }
 
                 unsafe

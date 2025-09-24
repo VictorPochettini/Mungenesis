@@ -68,7 +68,7 @@ class CanvasManager {
         }
 
         function getPochettiniColor(plateId) {
-            return PochettiniColorMap[plateId + 1];
+            return PochettiniColorMap[plateId];
         }
 // I have to think how I'll actually get the plateId from the JSON (the main problem actually lies on knowing how I'll store it)
 //I'll use a separate JSON I think, which means i should change the class
