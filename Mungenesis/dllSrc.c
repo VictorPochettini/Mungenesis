@@ -226,9 +226,9 @@ EXPORT void freeSeed(void *ptr)
 
 // POCHETTINI ALGORITHM ==========================================================================================================================
 
-void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate* adjacents[4])
+void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate *adjacents[4])
 {
-    if(plate->plateId == 0 || plate->coolDown == 1)
+    if (plate->plateId == 0 || plate->coolDown == 1)
     {
         plate->coolDown = 0;
         return;
@@ -236,7 +236,7 @@ void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize,
 
     for (int i = 0; i < 4; i++)
     {
-        if(adjacents[i]->plateId == 0)
+        if (adjacents[i]->plateId == 0)
         {
             adjacents[i]->plateId = plate->plateId;
             adjacents[i]->plateType = plate->plateType;
@@ -302,7 +302,7 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     int flag = 1;
     int worldArea = worldSize * worldSize;
     float percentage = 0.0f;
-    BlittablePlate* adjacents[4];
+    BlittablePlate *adjacents[4];
     srand(time(NULL));
 
     // Defines where the plates will be initially positioned
@@ -335,16 +335,24 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
             line = i / worldSize;
             column = i % worldSize;
             percentage = (float)i / (float)(worldArea) * 100.0f;
-
-            adjacents[0] = &plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
-            adjacents[1] = &plates[((line + 1) % worldSize) * worldSize + column];
-            adjacents[2] = &plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
-            adjacents[3] = &plates[line * worldSize + ((column + 1) % worldSize)];
+            if (percentage < 20 || percentage >= 80)
+            {
+                adjacents[0] = &plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
+                adjacents[1] = &plates[((line + 1) % worldSize) * worldSize + column];
+                adjacents[2] = &plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
+                adjacents[3] = &plates[line * worldSize + ((column + 1) % worldSize)];
+            }
+            else
+            {
+                adjacents[0] = &plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
+                adjacents[1] = &plates[line * worldSize + ((column + 1) % worldSize)];
+                adjacents[2] = &plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
+                adjacents[3] = &plates[((line + 1) % worldSize) * worldSize + column];
+            }
 
             checkAdjecent(&plates[i], plates, worldSize, adjacents);
             plates[i].coolDown = 0;
             map[i] = plates[i].plateId;
         }
     }
-    
 }
