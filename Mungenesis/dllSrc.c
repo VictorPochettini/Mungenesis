@@ -337,8 +337,8 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
             percentage = (float)i / (float)(worldArea) * 100.0f;
             if (percentage < 20 || percentage >= 80)
             {
-                adjacents[0] = &plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
-                adjacents[1] = &plates[((line + 1) % worldSize) * worldSize + column];
+                adjacents[0] = &plates[((line - 1 < 0 ? line : line - 1) % worldSize) * worldSize + column];
+                adjacents[1] = &plates[((line + 1 > worldSize ? line : line + 1) % worldSize) * worldSize + column];
                 adjacents[2] = &plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
                 adjacents[3] = &plates[line * worldSize + ((column + 1) % worldSize)];
             }
@@ -354,5 +354,5 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
             plates[i].coolDown = 0;
             map[i] = plates[i].plateId;
         }
-    }
+    }   
 }
