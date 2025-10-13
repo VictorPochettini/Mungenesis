@@ -244,55 +244,6 @@ void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize,
             continue;
         }
     }
-
-    /*
-    for(int i = 0; i < 4; i++)
-    {
-        if(adjacents[i].plateId != 0)
-        {
-            plate->plateId = adjacents[i].plateId;
-            plate->plateType = adjacents[i].plateType;
-            return;
-        }
-    }
-
-    int above = adjacents[0].plateId;
-    int below = adjacents[1].plateId;
-    int left = adjacents[2].plateId;
-    int right = adjacents[3].plateId;
-    int counter[4] = {0, 0, 0, 0};
-    int maior = 0;
-
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            if (adjacents[i].plateId == adjacents[j].plateId && i != j && adjacents[i].plateId != 0)
-            {
-                counter[i]++;
-            }
-        }
-    }
-
-    for (int i = 0; i < 4; i++)
-    {
-        if (counter[i] > 2 && adjacents[i].plateId != 0)
-        {
-            plate->plateId = adjacents[i].plateId;
-            plate->plateType = adjacents[i].plateType;
-            return;
-        }
-    }
-    for (int j = 0; j < 4; j++)
-    {
-        if (counter[j] > maior && adjacents[j].plateId != 0)
-        {
-            maior = counter[j];
-        }
-    }
-    plate->plateId = adjacents[maior].plateId;
-    plate->plateType = adjacents[maior].plateType;
-    */
 }
 
 EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
