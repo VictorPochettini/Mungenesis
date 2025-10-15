@@ -228,16 +228,16 @@ EXPORT void freeSeed(void *ptr)
 
 struct spreadQueue
 {
-    BlittablePlate** init;
-    BlittablePlate** end;
+    BlittablePlate **init;
+    BlittablePlate **end;
 
-    struct queueItem* firstItem;
+    struct queueItem *firstItem;
 };
 
 struct queueItem
 {
-    struct queueItem** prev;
-    struct queueItem** pos;
+    struct queueItem **prev;
+    struct queueItem **pos;
     BlittablePlate plate;
 };
 
@@ -247,51 +247,63 @@ struct spreadQueue createQueue(BlittablePlate plate)
     queue.init = &plate;
     queue.end = &plate;
 
-    struct queueItem* item = malloc(sizeof(struct queueItem));
-    item->prev = item;
-    item->pos = item;
+    struct queueItem *item = malloc(sizeof(struct queueItem));
     item->plate = plate;
     queue.firstItem = item;
-    
 
     return queue;
 }
 
 void addQueue(struct spreadQueue queue, BlittablePlate plate)
 {
-    if(queue.init == NULL)
+    if (queue.init == NULL)
     {
         createQueue(plate);
     }
     else
     {
-        struct queueItem* item = queue.firstItem;
-        while(item->pos != NULL)
+        struct queueItem *item = queue.firstItem;
+        while (item->pos != NULL)
         {
             item = item->pos;
         }
 
-        struct queueItem* post = malloc(sizeof(struct queueItem));
+        struct queueItem *post = malloc(sizeof(struct queueItem));
         post->prev = item;
         post->plate = plate;
         queue.end = &plate;
         item->pos = post;
-        
     }
-
 }
 
-void initializeMap(int *map, int n, int worldArea, BlittablePlate *plates)
+void clearQueue(struct spreadQueue queue)
+{
+    struct queueItem *item = queue.firstItem;
+    struct queueItem *aux;
+    while (item->pos != NULL)
+    {
+        item = item->pos;
+    }
+    while (item->prev != NULL)
+    {
+        aux = item;
+        item = item->prev;
+        free(aux);
+    }
+    free(item);
+}
+
+struct spreadQueue initializeMap(int *map, int n, int worldArea, BlittablePlate *plates)
 {
     int initialIndex = 0;
     struct spreadQueue queue;
 
-    for(int i = 1; i < n; i++)
+    for (int i = 1; i < n; i++)
     {
         initialIndex = rand() % worldArea;
         plates[initialIndex].plateId = i;
 
-        if(rand() % 10 < 3)
+        if (rand() % 10 < 3)
         {
             plates[initialIndex].plateType = 0;
         }
@@ -300,11 +312,59 @@ void initializeMap(int *map, int n, int worldArea, BlittablePlate *plates)
             plates[initialIndex].plateType = 1;
         }
 
-        if(i == 1)
+        if (i == 1)
             queue = createQueue(plates[initialIndex]);
         else
-        ;
+            addQueue(queue, plates[initialIndex]);
     }
+
+    return queue;
+}
+
+BlittablePlate* neighbors(BlittablePlate *plates, BlittablePlate plate, int worldSize)
+{
+    BlittablePlate *adjacents[4];
+    int position = plate.id;
+    int line = position / worldSize;
+    int column = position % worldSize;
+
+    if(line == 0)
+    {
+        adjacents[0] = -1;
+        adjacents[1] = &plates[position + worldSize];
+    }
+    else if(line == worldSize)
+    {
+        adjacents[0] = &plates[position - worldSize];
+        adjacents[1] = -1;
+    }
+    else
+    {
+        adjacents[0] = &plates[position - worldSize];
+        adjacents[1] = &plates[position + worldSize];
+    }
+
+    //Tratando colunas
+
+    if(column == 0)
+    {
+        //Vai pro último da coluna
+        adjacents[2] = &plates[position + (worldSize - 1)];
+        adjacents[3] = &plates[position + 1];
+    }
+    else if(column == worldSize)
+    {
+        adjacents[2] = &plates[position - 1];
+        //Vai pro primeiro da coluna
+        adjacents[3] = &plates[position - (worldSize - 1)];
+    }
+    else
+    {
+        adjacents[2] = &plates[position - 1 ];
+        adjacents[3] = &plates[position + 1];
+    }
+
+    return adjacents;
 }
 
 EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
@@ -315,24 +375,8 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     int worldArea = worldSize * worldSize;
     float percentage = 0.0f;
     BlittablePlate *adjacents[4];
-    srand(time(NULL));
 
-    struct spreadQueue queue;
-
-    // Defines where the plates will be initially positioned
-    for (int i = 1; i < 10; i++)
-    {
-        int initialIndex = rand() % (worldArea);
-        plates[initialIndex].plateId = i;
-        if (rand() % 10 < 3) // 30% chance to be type 0
-        {
-            plates[initialIndex].plateType = 0;
-        }
-        else
-        {
-            plates[initialIndex].plateType = 1;
-        }
-    }
+    struct spreadQueue queue = initializeMap(map, 10, worldArea, plates);
 
     // Fills the rest of the map with plates
     while (flag)
@@ -349,24 +393,10 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
             line = i / worldSize;
             column = i % worldSize;
             percentage = (float)i / (float)(worldArea) * 100.0f;
-            if (percentage < 20 || percentage >= 80)
-            {
-                adjacents[0] = &plates[((line - 1 < 0 ? line : line - 1) % worldSize) * worldSize + column];
-                adjacents[1] = &plates[((line + 1 > worldSize ? line : line + 1) % worldSize) * worldSize + column];
-                adjacents[2] = &plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
-                adjacents[3] = &plates[line * worldSize + ((column + 1) % worldSize)];
-            }
-            else
-            {
-                adjacents[0] = &plates[line * worldSize + ((column - 1 + worldSize) % worldSize)];
-                adjacents[1] = &plates[line * worldSize + ((column + 1) % worldSize)];
-                adjacents[2] = &plates[((line - 1 + worldSize) % worldSize) * worldSize + column];
-                adjacents[3] = &plates[((line + 1) % worldSize) * worldSize + column];
-            }
 
             checkAdjecent(&plates[i], plates, worldSize, adjacents);
             plates[i].coolDown = 0;
             map[i] = plates[i].plateId;
         }
-    }   
+    }
 }
