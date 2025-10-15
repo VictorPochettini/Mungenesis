@@ -228,75 +228,77 @@ EXPORT void freeSeed(void *ptr)
 
 struct spreadQueue
 {
-    BlittablePlate **init;
-    BlittablePlate **end;
-
+    BlittablePlate *init;
+    BlittablePlate *end;
     struct queueItem *firstItem;
 };
 
 struct queueItem
 {
-    struct queueItem **prev;
-    struct queueItem **pos;
+    struct queueItem *prev;
+    struct queueItem *next;
     BlittablePlate plate;
 };
 
 struct spreadQueue createQueue(BlittablePlate plate)
 {
     struct spreadQueue queue;
-    queue.init = &plate;
-    queue.end = &plate;
+    queue.init = NULL;
+    queue.end = NULL;
 
     struct queueItem *item = malloc(sizeof(struct queueItem));
     item->plate = plate;
+    item->prev = NULL;
+    item->next = NULL;
     queue.firstItem = item;
 
     return queue;
 }
 
-void addQueue(struct spreadQueue queue, BlittablePlate plate)
+void addQueue(struct spreadQueue *queue, BlittablePlate plate)
 {
-    if (queue.init == NULL)
+    if (queue->firstItem == NULL)
     {
-        createQueue(plate);
+        *queue = createQueue(plate);
     }
     else
     {
-        struct queueItem *item = queue.firstItem;
-        while (item->pos != NULL)
+        struct queueItem *item = queue->firstItem;
+        while (item->next != NULL)
         {
-            item = item->pos;
+            item = item->next;
         }
 
         struct queueItem *post = malloc(sizeof(struct queueItem));
         post->prev = item;
+        post->next = NULL;
         post->plate = plate;
-        queue.end = &plate;
-        item->pos = post;
+        item->next = post;
     }
 }
 
-void clearQueue(struct spreadQueue queue)
+void clearQueue(struct spreadQueue *queue)
 {
-    struct queueItem *item = queue.firstItem;
+    struct queueItem *item = queue->firstItem;
     struct queueItem *aux;
-    while (item->pos != NULL)
-    {
-        item = item->pos;
-    }
-    while (item->prev != NULL)
+
+    while (item != NULL)
     {
         aux = item;
-        item = item->prev;
+        item = item->next;
         free(aux);
     }
-    free(item);
+
+    queue->firstItem = NULL;
+    queue->init = NULL;
+    queue->end = NULL;
 }
 
 struct spreadQueue initializeMap(int *map, int n, int worldArea, BlittablePlate *plates)
 {
     int initialIndex = 0;
     struct spreadQueue queue;
+    queue.firstItem = NULL;
 
     for (int i = 1; i < n; i++)
     {
@@ -315,55 +317,28 @@ struct spreadQueue initializeMap(int *map, int n, int worldArea, BlittablePlate 
         if (i == 1)
             queue = createQueue(plates[initialIndex]);
         else
-            addQueue(queue, plates[initialIndex]);
+            addQueue(&queue, plates[initialIndex]);
     }
 
     return queue;
 }
 
-struct spreadQueue spread(BlittablePlate *plates, struct spreadQueue queue, int worldSize)
+void neighbors(BlittablePlate *plates, BlittablePlate plate, int worldSize, BlittablePlate **adjacents)
 {
-    struct queueItem* item = queue.firstItem;
-    struct spreadQueue newQueue;
-
-    while(item->pos != NULL)
-    {
-        BlittablePlate* adjacent[4] = neighbors(plates, item->plate, worldSize);
-
-        for(int i = 0; i < 4; i++)
-        {
-            if(adjacent[i]->plateId == 0)
-            {
-                adjacent[i]->plateId = item->plate.plateId;
-                adjacent[i]->plateType = item->plate.plateType;
-                addQueue(newQueue, *adjacent[i]);
-            }
-        }
-
-        item = item->pos;
-    }
-
-    clearQueue(queue);
-    return newQueue;
-
-}
-
-BlittablePlate* neighbors(BlittablePlate *plates, BlittablePlate plate, int worldSize)
-{
-    BlittablePlate *adjacents[4];
     int position = plate.id;
     int line = position / worldSize;
     int column = position % worldSize;
 
-    if(line == 0)
+    // Tratando linhas
+    if (line == 0)
     {
-        adjacents[0] = -1;
+        adjacents[0] = NULL;
         adjacents[1] = &plates[position + worldSize];
     }
-    else if(line == worldSize)
+    else if (line == (worldSize - 1))
     {
         adjacents[0] = &plates[position - worldSize];
-        adjacents[1] = -1;
+        adjacents[1] = NULL;
     }
     else
     {
@@ -371,42 +346,68 @@ BlittablePlate* neighbors(BlittablePlate *plates, BlittablePlate plate, int worl
         adjacents[1] = &plates[position + worldSize];
     }
 
-    //Tratando colunas
-
-    if(column == 0)
+    // Tratando colunas (wrapping horizontal)
+    if (column == 0)
     {
-        //Vai pro último da coluna
         adjacents[2] = &plates[position + (worldSize - 1)];
         adjacents[3] = &plates[position + 1];
     }
-    else if(column == worldSize)
+    else if (column == (worldSize - 1))
     {
         adjacents[2] = &plates[position - 1];
-        //Vai pro primeiro da coluna
         adjacents[3] = &plates[position - (worldSize - 1)];
     }
     else
     {
-        adjacents[2] = &plates[position - 1 ];
+        adjacents[2] = &plates[position - 1];
         adjacents[3] = &plates[position + 1];
     }
+}
 
-    return adjacents;
+struct spreadQueue spread(BlittablePlate *plates, struct spreadQueue queue, int worldSize)
+{
+    struct queueItem *item = queue.firstItem;
+    struct spreadQueue newQueue;
+    newQueue.firstItem = NULL;
+    newQueue.init = NULL;
+    newQueue.end = NULL;
+
+    while (item != NULL)
+    {
+        BlittablePlate *adjacent[4];
+        neighbors(plates, item->plate, worldSize, adjacent);
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (adjacent[i] != NULL && adjacent[i]->plateId == 0)
+            {
+                adjacent[i]->plateId = item->plate.plateId;
+                adjacent[i]->plateType = item->plate.plateType;
+                addQueue(&newQueue, *adjacent[i]);
+            }
+        }
+
+        item = item->next;
+    }
+
+    clearQueue(&queue);
+    return newQueue;
 }
 
 EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
 {
     int platesNumber = 9;
-    int line, column;
-    int flag = 1;
     int worldArea = worldSize * worldSize;
-    float percentage = 0.0f;
-    BlittablePlate *adjacents[4];
 
     struct spreadQueue queue = initializeMap(map, 10, worldArea, plates);
 
-    while(queue.firstItem != NULL)
+    while (queue.firstItem != NULL)
     {
         queue = spread(plates, queue, worldSize);
+    }
+
+    for (int i = 0; i < worldArea; i++)
+    {
+        map[i] = plates[i].plateId;
     }
 }
