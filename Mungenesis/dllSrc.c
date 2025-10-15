@@ -321,6 +321,33 @@ struct spreadQueue initializeMap(int *map, int n, int worldArea, BlittablePlate 
     return queue;
 }
 
+struct spreadQueue spread(BlittablePlate *plates, struct spreadQueue queue, int worldSize)
+{
+    struct queueItem* item = queue.firstItem;
+    struct spreadQueue newQueue;
+
+    while(item->pos != NULL)
+    {
+        BlittablePlate* adjacent[4] = neighbors(plates, item->plate, worldSize);
+
+        for(int i = 0; i < 4; i++)
+        {
+            if(adjacent[i]->plateId == 0)
+            {
+                adjacent[i]->plateId = item->plate.plateId;
+                adjacent[i]->plateType = item->plate.plateType;
+                addQueue(newQueue, *adjacent[i]);
+            }
+        }
+
+        item = item->pos;
+    }
+
+    clearQueue(queue);
+    return newQueue;
+
+}
+
 BlittablePlate* neighbors(BlittablePlate *plates, BlittablePlate plate, int worldSize)
 {
     BlittablePlate *adjacents[4];
@@ -378,25 +405,8 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
 
     struct spreadQueue queue = initializeMap(map, 10, worldArea, plates);
 
-    // Fills the rest of the map with plates
-    while (flag)
+    while(queue.firstItem != NULL)
     {
-        flag = 0;
-        for (int i = 0; i < worldArea; i++)
-        {
-            if (plates[i].plateId == 0)
-            {
-                flag = 1;
-                continue;
-            }
-
-            line = i / worldSize;
-            column = i % worldSize;
-            percentage = (float)i / (float)(worldArea) * 100.0f;
-
-            checkAdjecent(&plates[i], plates, worldSize, adjacents);
-            plates[i].coolDown = 0;
-            map[i] = plates[i].plateId;
-        }
+        queue = spread(plates, queue, worldSize);
     }
 }
