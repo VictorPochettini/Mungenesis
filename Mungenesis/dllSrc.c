@@ -226,6 +226,25 @@ EXPORT void freeSeed(void *ptr)
 
 // POCHETTINI ALGORITHM ==========================================================================================================================
 
+struct spreadQueue
+{
+    BlittablePlate** init;
+    BlittablePlate** end;
+};
+
+struct queueItem
+{
+    BlittablePlate** prev;
+    BlittablePlate** cur;
+    BlittablePlate** post;
+};
+
+void createQueue(struct spreadQueue queue, BlittablePlate *plate)
+{
+    queue.init = &plate;
+    queue.end = &plate;
+}
+
 void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate *adjacents[4])
 {
     if (plate->plateId == 0 || plate->coolDown == 1)
