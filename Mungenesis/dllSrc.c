@@ -230,38 +230,80 @@ struct spreadQueue
 {
     BlittablePlate** init;
     BlittablePlate** end;
+
+    struct queueItem* firstItem;
 };
 
 struct queueItem
 {
-    BlittablePlate** prev;
-    BlittablePlate** cur;
-    BlittablePlate** post;
+    struct queueItem** prev;
+    struct queueItem** pos;
+    BlittablePlate plate;
 };
 
-void createQueue(struct spreadQueue queue, BlittablePlate *plate)
+struct spreadQueue createQueue(BlittablePlate plate)
 {
+    struct spreadQueue queue;
     queue.init = &plate;
     queue.end = &plate;
+
+    struct queueItem* item = malloc(sizeof(struct queueItem));
+    item->prev = item;
+    item->pos = item;
+    item->plate = plate;
+    queue.firstItem = item;
+    
+
+    return queue;
 }
 
-void checkAdjecent(BlittablePlate *plate, BlittablePlate *plates, int worldSize, BlittablePlate *adjacents[4])
+void addQueue(struct spreadQueue queue, BlittablePlate plate)
 {
-    if (plate->plateId == 0 || plate->coolDown == 1)
+    if(queue.init == NULL)
     {
-        plate->coolDown = 0;
-        return;
+        createQueue(plate);
+    }
+    else
+    {
+        struct queueItem* item = queue.firstItem;
+        while(item->pos != NULL)
+        {
+            item = item->pos;
+        }
+
+        struct queueItem* post = malloc(sizeof(struct queueItem));
+        post->prev = item;
+        post->plate = plate;
+        queue.end = &plate;
+        item->pos = post;
+        
     }
 
-    for (int i = 0; i < 4; i++)
+}
+
+void initializeMap(int *map, int n, int worldArea, BlittablePlate *plates)
+{
+    int initialIndex = 0;
+    struct spreadQueue queue;
+
+    for(int i = 1; i < n; i++)
     {
-        if (adjacents[i]->plateId == 0)
+        initialIndex = rand() % worldArea;
+        plates[initialIndex].plateId = i;
+
+        if(rand() % 10 < 3)
         {
-            adjacents[i]->plateId = plate->plateId;
-            adjacents[i]->plateType = plate->plateType;
-            adjacents[i]->coolDown = 1;
-            continue;
+            plates[initialIndex].plateType = 0;
         }
+        else
+        {
+            plates[initialIndex].plateType = 1;
+        }
+
+        if(i == 1)
+            queue = createQueue(plates[initialIndex]);
+        else
+        ;
     }
 }
 
@@ -274,6 +316,8 @@ EXPORT void PochettiniAlgorithm(BlittablePlate *plates, int worldSize, int *map)
     float percentage = 0.0f;
     BlittablePlate *adjacents[4];
     srand(time(NULL));
+
+    struct spreadQueue queue;
 
     // Defines where the plates will be initially positioned
     for (int i = 1; i < 10; i++)
